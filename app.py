@@ -21,12 +21,29 @@ def index():
     else:
         sectors = sorted(df['Sector'].unique().tolist())
         
-        # Build data structure for JavaScript: {sector: {years: [...], values: [...]}}
+        # Build data structure for JavaScript: {sector: {quarters: [...], values: [...]}}
         sector_data = {}
         for sector in sectors:
-            data = df[df['Sector'] == sector].sort_values('Year')
+            data = df[df['Sector'] == sector].sort_values(['Year', 'Period']).copy()
+            
+            # Create quarter labels: extract quarter number from Period (e.g., "KW01" -> "01")
+            # and combine with year to create labels like "2020-Q1"
+            quarters = []
+            for _, row in data.iterrows():
+                year = row['Year']
+                period = str(row['Period']).strip() if pd.notna(row['Period']) else ''
+                # Extract quarter number (e.g., "KW01" -> "1", "1e kwartaal" -> "1")
+                if 'KW' in period:
+                    q_num = period.replace('KW', '').lstrip('0') or '0'
+                elif period and period[0].isdigit():
+                    q_num = period[0]  # Get first character if it's a digit
+                else:
+                    q_num = '1'  # Default to Q1 if period is empty or not parseable
+                quarter_label = f"{year}-Q{q_num}"
+                quarters.append(quarter_label)
+            
             sector_data[sector] = {
-                'years': data['Year'].tolist(),
+                'quarters': quarters,
                 'values': data['AbsenteeismPercentage'].tolist()
             }
         
@@ -35,21 +52,21 @@ def index():
         # Create initial plot with all sectors visible
         fig = go.Figure()
         for sector in sectors:
-            years = sector_data[sector]['years']
+            quarters = sector_data[sector]['quarters']
             values = sector_data[sector]['values']
             fig.add_trace(go.Scatter(
-                x=years,
+                x=quarters,
                 y=values,
                 mode='lines+markers',
                 name=sector,
                 visible=True,
-                hovertemplate='<b>%{text}</b><br>Jaar: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>',
+                hovertemplate='<b>%{text}</b><br>Kwartaal: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>',
                 text=[sector] * len(values)
             ))
 
         fig.update_layout(
             title='Ziekteverzuimpercentage per sector over tijd',
-            xaxis_title='Jaar',
+            xaxis_title='Kwartaal',
             yaxis_title='Ziekteverzuim %',
             legend_title='Sector',
             hovermode='closest',
@@ -233,17 +250,17 @@ def index():
                 
                 // Build traces for selected sectors
                 const traces = selectedSectors.map(sector => ({
-                    x: sectorData[sector].years,
+                    x: sectorData[sector].quarters,
                     y: sectorData[sector].values,
                     mode: 'lines+markers',
                     name: sector,
                     type: 'scatter',
-                    hovertemplate: '<b>' + sector + '</b><br>Jaar: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>'
+                    hovertemplate: '<b>' + sector + '</b><br>Kwartaal: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>'
                 }));
                 
                 const layout = {
                     title: 'Ziekteverzuimpercentage per sector over tijd',
-                    xaxis: { title: 'Jaar' },
+                    xaxis: { title: 'Kwartaal' },
                     yaxis: { title: 'Ziekteverzuim %' },
                     legend: { title: { text: 'Sector' } },
                     hovermode: 'closest',
