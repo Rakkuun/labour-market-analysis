@@ -18,33 +18,41 @@ def index():
         plot_html = '<p>No data available for plotting.</p>'
         sectors = []
         sector_data_json = '{}'
+        years = []
+        min_year = 2024
+        max_year = 2024
     else:
         sectors = sorted(df['Sector'].unique().tolist())
+        years = sorted(df['Year'].unique().tolist())
+        min_year = int(years[0])
+        max_year = int(years[-1])
         
-        # Build data structure for JavaScript: {sector: {quarters: [...], values: [...]}}
+        # Build data structure for JavaScript: {sector: {quarters: [...], values: [...], years: [...]}}}
         sector_data = {}
         for sector in sectors:
             data = df[df['Sector'] == sector].sort_values(['Year', 'Period']).copy()
             
-            # Create quarter labels: extract quarter number from Period (e.g., "KW01" -> "01")
-            # and combine with year to create labels like "2020-Q1"
+            # Create quarter labels and collect year info
             quarters = []
+            years_list = []
             for _, row in data.iterrows():
-                year = row['Year']
+                year = int(row['Year'])
                 period = str(row['Period']).strip() if pd.notna(row['Period']) else ''
                 # Extract quarter number (e.g., "KW01" -> "1", "1e kwartaal" -> "1")
                 if 'KW' in period:
                     q_num = period.replace('KW', '').lstrip('0') or '0'
                 elif period and period[0].isdigit():
-                    q_num = period[0]  # Get first character if it's a digit
+                    q_num = period[0]
                 else:
-                    q_num = '1'  # Default to Q1 if period is empty or not parseable
+                    q_num = '1'
                 quarter_label = f"{year}-Q{q_num}"
                 quarters.append(quarter_label)
+                years_list.append(year)
             
             sector_data[sector] = {
                 'quarters': quarters,
-                'values': data['AbsenteeismPercentage'].tolist()
+                'values': data['AbsenteeismPercentage'].tolist(),
+                'years': years_list
             }
         
         sector_data_json = json.dumps(sector_data)
@@ -121,6 +129,18 @@ def index():
                 background: linear-gradient(#0d6efd, #0d6efd);
                 background-color: #0d6efd !important;
             }
+            .year-range-inputs {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            .year-range-inputs input {
+                flex: 1;
+                padding: 6px 10px;
+                border: 1px solid #dee2e6;
+                border-radius: 4px;
+                font-size: 0.9rem;
+            }
             .btn-filter {
                 border-radius: 4px;
                 font-weight: 500;
@@ -185,23 +205,38 @@ def index():
             <div class='row mb-5'>
                 <div class='col-lg-3'>
                     <div class='filter-panel p-4'>
-                        <h5 class='mb-3'>
-                            <i class='bi bi-funnel'></i> Sector filter
+                        <h5 class='mb-4'>
+                            <i class='bi bi-funnel'></i> Filters
                         </h5>
-                        <p class='text-muted small mb-3'>Selecteer sectoren om in de grafiek te tonen.</p>
-                        <div class='d-grid gap-2 mb-3'>
-                            <button type='button' class='btn btn-primary btn-sm btn-filter' onclick='selectAll()'>
-                                <i class='bi bi-check-all'></i> Select all
-                            </button>
-                            <button type='button' class='btn btn-outline-secondary btn-sm btn-filter' onclick='deselectAll()'>
-                                <i class='bi bi-x-circle'></i> Deselect all
-                            </button>
+                        
+                        <div class='mb-4'>
+                            <h6 class='mb-3'>Jaar bereik</h6>
+                            <div class='year-range-inputs'>
+                                <input type='number' id='yearMin' class='form-control' min='{{ min_year }}' max='{{ max_year }}' value='{{ min_year }}' placeholder='Min'>
+                                <input type='number' id='yearMax' class='form-control' min='{{ min_year }}' max='{{ max_year }}' value='{{ max_year }}' placeholder='Max'>
+                            </div>
+                            <button type='button' class='btn btn-sm btn-outline-secondary w-100' onclick='resetYears()'>Reset years</button>
                         </div>
-                        <select id='sectorFilter' class='form-select' multiple>
-                            {% for sector in sectors %}
-                            <option value='{{ sector }}' selected>{{ sector }}</option>
-                            {% endfor %}
-                        </select>
+                        
+                        <hr>
+                        
+                        <div>
+                            <h6 class='mb-3'>Sectoren</h6>
+                            <p class='text-muted small mb-3'>Selecteer sectoren om in de grafiek te tonen.</p>
+                            <div class='d-grid gap-2 mb-3'>
+                                <button type='button' class='btn btn-primary btn-sm btn-filter' onclick='selectAll()'>
+                                    <i class='bi bi-check-all'></i> Select all
+                                </button>
+                                <button type='button' class='btn btn-outline-secondary btn-sm btn-filter' onclick='deselectAll()'>
+                                    <i class='bi bi-x-circle'></i> Deselect all
+                                </button>
+                            </div>
+                            <select id='sectorFilter' class='form-select' multiple>
+                                {% for sector in sectors %}
+                                <option value='{{ sector }}' selected>{{ sector }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class='col-lg-9'>
@@ -248,15 +283,35 @@ def index():
                     return;
                 }
                 
-                // Build traces for selected sectors
-                const traces = selectedSectors.map(sector => ({
-                    x: sectorData[sector].quarters,
-                    y: sectorData[sector].values,
-                    mode: 'lines+markers',
-                    name: sector,
-                    type: 'scatter',
-                    hovertemplate: '<b>' + sector + '</b><br>Kwartaal: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>'
-                }));
+                // Get year range filter
+                const yearMin = parseInt(document.getElementById('yearMin').value) || {{ min_year }};
+                const yearMax = parseInt(document.getElementById('yearMax').value) || {{ max_year }};
+                
+                // Build traces for selected sectors, filtered by year
+                const traces = selectedSectors.map(sector => {
+                    const quarters = sectorData[sector].quarters;
+                    const values = sectorData[sector].values;
+                    const years = sectorData[sector].years;
+                    
+                    // Filter data points based on year range
+                    const x = [];
+                    const y = [];
+                    for (let i = 0; i < years.length; i++) {
+                        if (years[i] >= yearMin && years[i] <= yearMax) {
+                            x.push(quarters[i]);
+                            y.push(values[i]);
+                        }
+                    }
+                    
+                    return {
+                        x: x,
+                        y: y,
+                        mode: 'lines+markers',
+                        name: sector,
+                        type: 'scatter',
+                        hovertemplate: '<b>' + sector + '</b><br>Kwartaal: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>'
+                    };
+                });
                 
                 const layout = {
                     title: 'Ziekteverzuimpercentage per sector over tijd',
@@ -302,12 +357,24 @@ def index():
                 updateFilter();
             }
 
+            function resetYears() {
+                document.getElementById('yearMin').value = {{ min_year }};
+                document.getElementById('yearMax').value = {{ max_year }};
+                updateFilter();
+            }
+
             // Initialize on page load
             document.addEventListener('DOMContentLoaded', function() {
                 const select = document.getElementById('sectorFilter');
                 if (select) {
                     select.addEventListener('change', updateFilter);
                 }
+                
+                // Add listeners for year range inputs
+                const yearMin = document.getElementById('yearMin');
+                const yearMax = document.getElementById('yearMax');
+                if (yearMin) yearMin.addEventListener('change', updateFilter);
+                if (yearMax) yearMax.addEventListener('change', updateFilter);
             });
         </script>
     </body>
@@ -316,7 +383,7 @@ def index():
 
     table = df.head(20).to_html(index=False) if not df.empty else '<p>No data available.</p>'
     pred_table = pred_df.to_html(index=False) if not pred_df.empty else '<p>No predictions available.</p>'
-    return render_template_string(html, table=table, pred_table=pred_table, plot_html=plot_html, sectors=sectors, sector_data_json=sector_data_json)
+    return render_template_string(html, table=table, pred_table=pred_table, plot_html=plot_html, sectors=sectors, sector_data_json=sector_data_json, years=years, min_year=min_year, max_year=max_year)
 
 if __name__ == "__main__":
     app.run(debug=True)
