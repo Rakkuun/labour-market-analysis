@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Labour Market Analysis</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -72,6 +73,10 @@
             <div class="col-lg-9">
                 <div class="plot-container">
                     {{ plot_html|safe }}
+                </div>
+                <div id="analysisPanel" class="analysis-panel mt-4 p-4 rounded shadow-sm bg-white">
+                    <h5><i class="bi bi-stars"></i> Automatische analyse</h5>
+                    <p id="analysisText" class="mb-0 text-muted">Selecteer sectoren en een jaarrange om een korte trendanalyse te zien.</p>
                 </div>
             </div>
         </div>
