@@ -99,11 +99,11 @@ function deselectAll() {
 }
 
 /**
- * Reset year range to full dataset
+ * Reset year range to the default latest five-year window
  */
 function resetYears() {
-    document.getElementById('yearMin').value = minYear;
-    document.getElementById('yearMax').value = maxYear;
+    document.getElementById('yearMin').value = defaultMinYear;
+    document.getElementById('yearMax').value = defaultMaxYear;
     updateFilter();
 }
 
@@ -123,4 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const yearMax = document.getElementById('yearMax');
     if (yearMin) yearMin.addEventListener('change', updateFilter);
     if (yearMax) yearMax.addEventListener('change', updateFilter);
+
+    // Apply the default filter window immediately on load
+    updateFilter();
 });

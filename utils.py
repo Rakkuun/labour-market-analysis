@@ -2,6 +2,7 @@
 Utility functions for data processing and visualization.
 """
 import re
+import datetime
 import pandas as pd
 import sqlite3
 import json
@@ -130,13 +131,17 @@ def prepare_context(df, pred_df):
         dict: context for template rendering
     """
     if df.empty:
+        min_year = 2024
+        max_year = 2024
         return {
             'plot_html': '<p>No data available for plotting.</p>',
             'sectors': [],
             'sector_data_json': '{}',
             'years': [],
-            'min_year': 2024,
-            'max_year': 2024,
+            'min_year': min_year,
+            'max_year': max_year,
+            'default_min_year': min_year,
+            'default_max_year': max_year,
             'table': '<p>No data available.</p>',
             'pred_table': '<p>No predictions available.</p>'
         }
@@ -146,6 +151,10 @@ def prepare_context(df, pred_df):
     years = sorted(df['Year'].unique().tolist())
     min_year = int(years[0])
     max_year = int(years[-1])
+
+    current_year = datetime.datetime.now().year
+    default_max_year = min(max_year, current_year)
+    default_min_year = max(min_year, default_max_year - 4)
     
     # Create visualizations and tables
     plot_html = create_plotly_figure(sector_data, sectors)
@@ -159,6 +168,8 @@ def prepare_context(df, pred_df):
         'years': years,
         'min_year': min_year,
         'max_year': max_year,
+        'default_min_year': default_min_year,
+        'default_max_year': default_max_year,
         'table': table,
         'pred_table': pred_table
     }
