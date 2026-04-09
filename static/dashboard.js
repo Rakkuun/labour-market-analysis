@@ -2,7 +2,7 @@
  * Dashboard interactivity functions
  */
 
-const allSectors = Object.keys(sectorData);
+let allSectors = [];
 
 /**
  * Rebuild the plot with selected sectors and year range
@@ -111,6 +111,8 @@ function resetYears() {
  * Initialize event listeners on page load
  */
 document.addEventListener('DOMContentLoaded', function() {
+    allSectors = Object.keys(sectorData);
+
     const select = document.getElementById('sectorFilter');
     if (select) {
         select.addEventListener('change', updateFilter);
