@@ -53,7 +53,9 @@ def index():
             yaxis_title='Ziekteverzuim %',
             legend_title='Sector',
             hovermode='closest',
-            margin=dict(l=40, r=40, t=70, b=40)
+            margin=dict(l=40, r=40, t=70, b=40),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
         )
 
         plot_html = fig.to_html(full_html=False, include_plotlyjs='cdn', div_id='plotly-chart')
@@ -245,7 +247,9 @@ def index():
                     yaxis: { title: 'Ziekteverzuim %' },
                     legend: { title: { text: 'Sector' } },
                     hovermode: 'closest',
-                    margin: { l: 40, r: 40, t: 70, b: 40 }
+                    margin: { l: 40, r: 40, t: 70, b: 40 },
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    paper_bgcolor: 'rgba(0,0,0,0)'
                 };
                 
                 try {
