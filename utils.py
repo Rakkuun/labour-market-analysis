@@ -1,6 +1,7 @@
 """
 Utility functions for data processing and visualization.
 """
+import re
 import pandas as pd
 import sqlite3
 import json
@@ -22,18 +23,21 @@ def extract_quarter_number(period_str):
     Examples:
         "KW01" -> "1"
         "1e kwartaal" -> "1"
-        "" -> "1" (default)
+    Returns None for non-quarter or blank periods.
     """
     period = str(period_str).strip() if pd.notna(period_str) else ''
-    
-    if 'KW' in period:
-        q_num = period.replace('KW', '').lstrip('0') or '0'
-    elif period and period[0].isdigit():
-        q_num = period[0]
-    else:
-        q_num = '1'
-    
-    return q_num
+    if not period:
+        return None
+
+    kw_match = re.search(r'KW0*([1-4])', period, re.IGNORECASE)
+    if kw_match:
+        return kw_match.group(1)
+
+    norm_match = re.search(r'([1-4])e kwartaal', period, re.IGNORECASE)
+    if norm_match:
+        return norm_match.group(1)
+
+    return None
 
 
 def build_sector_data(df):
@@ -50,18 +54,25 @@ def build_sector_data(df):
         
         quarters = []
         years_list = []
+        values = []
         
         for _, row in data.iterrows():
             year = int(row['Year'])
-            q_num = extract_quarter_number(row['Period'])
-            quarter_label = f"{year}-Q{q_num}"
+            period = str(row['Period']).strip() if pd.notna(row['Period']) else ''
+            quarter = extract_quarter_number(period)
             
+            # Only include valid quarterly rows; skip annual or blank period rows
+            if quarter is None:
+                continue
+            
+            quarter_label = f"{year}-Q{quarter}"
             quarters.append(quarter_label)
             years_list.append(year)
+            values.append(row['AbsenteeismPercentage'])
         
         sector_data[sector] = {
             'quarters': quarters,
-            'values': data['AbsenteeismPercentage'].tolist(),
+            'values': values,
             'years': years_list
         }
     
