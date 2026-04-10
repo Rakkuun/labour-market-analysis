@@ -140,19 +140,35 @@ function updateFilter() {
  * Render a textual analysis of the selected sectors and period using AI.
  */
 function renderAnalysis(selectedSectors) {
-    const analysisText = document.getElementById('analysisText');
-    if (!analysisText) return;
-
     const yearMin = parseInt(document.getElementById('yearMin').value) || minYear;
     const yearMax = parseInt(document.getElementById('yearMax').value) || maxYear;
-    
+
     if (selectedSectors.length === 0) {
-        analysisText.textContent = 'Selecteer sectoren om een trendanalyse te ontvangen.';
+        const placeholder = document.getElementById('analysisPlaceholder');
+        const historyPanel = document.getElementById('historyPanel');
+        const forecastPanel = document.getElementById('forecastPanel');
+        if (placeholder) placeholder.style.display = 'block';
+        if (historyPanel) historyPanel.style.display = 'none';
+        if (forecastPanel) forecastPanel.style.display = 'none';
         return;
     }
 
     // Show loading state
-    analysisText.innerHTML = '<em class="text-muted">AI-analyse wordt gegenereerd...</em>';
+    const analysisText = document.getElementById('analysisText');
+    const historyPanel = document.getElementById('historyPanel');
+    const placeholder = document.getElementById('analysisPlaceholder');
+    const forecastPanel = document.getElementById('forecastPanel');
+    const forecastText = document.getElementById('forecastText');
+
+    if (placeholder) placeholder.style.display = 'none';
+    if (historyPanel) { historyPanel.style.display = 'block'; analysisText.innerHTML = '<em class="text-muted">AI-analyse wordt gegenereerd...</em>'; }
+    if (forecastPanel) forecastPanel.style.display = 'none';
+
+    // Build pred_dict subset for selected sectors
+    const predSubset = {};
+    selectedSectors.forEach(s => {
+        if (predictionData && predictionData[s]) predSubset[s] = predictionData[s];
+    });
 
     // Call the API endpoint
     fetch('/api/analyze', {
@@ -163,7 +179,8 @@ function renderAnalysis(selectedSectors) {
         body: JSON.stringify({
             sectors: selectedSectors,
             year_min: yearMin,
-            year_max: yearMax
+            year_max: yearMax,
+            pred_dict: predSubset
         })
     })
     .then(response => response.json())
@@ -172,6 +189,10 @@ function renderAnalysis(selectedSectors) {
             analysisText.textContent = `Fout: ${data.error}`;
         } else {
             analysisText.textContent = data.analysis;
+            if (forecastPanel && forecastText && data.forecast) {
+                forecastText.textContent = data.forecast;
+                forecastPanel.style.display = 'block';
+            }
         }
     })
     .catch(error => {

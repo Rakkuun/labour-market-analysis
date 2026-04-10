@@ -225,7 +225,7 @@ def prepare_context(df, pred_df):
     }
 
 
-def analyze_with_ai(sector_data, selected_sectors, year_min, year_max):
+def analyze_with_ai(sector_data, selected_sectors, year_min, year_max, pred_dict=None):
     """Analyze sector trends using DeepSeek AI.
     
     Args:
@@ -263,9 +263,38 @@ def analyze_with_ai(sector_data, selected_sectors, year_min, year_max):
                 'quarters': len(filtered_values)
             })
     if not stats:
-        return 'Geen data beschikbaar voor de geselecteerde periode.'
+        return 'Geen data beschikbaar voor de geselecteerde periode.', ''
     data_str = json.dumps(stats, indent=2)
-    prompt = f"""Je bent een arbeidsmarktanalist die grafieken met ziekteverzuimpercentages analyseert.\n\nAnalyseer deze data voor sectoren in Nederland van {year_min} tot {year_max}:\n{data_str}\n\nGeef een korte, professionele trendanalyse in Nederlands (2-3 zinnen max). Focus op:\n1. Trends (op/neerwaartse beweging)\n2. Vergelijking tussen sectoren (als meer dan 1)\n3. Opvallende patronen of anomalieën\n\nWees beknopt en specifiek."""
+
+    # Build forecast summary for selected sectors
+    forecast_stats = []
+    if pred_dict:
+        for sector in selected_sectors:
+            if sector in pred_dict:
+                forecast_stats.append({
+                    'sector': sector,
+                    'prognoses': [
+                        {'kwartaal': q, 'waarde': v}
+                        for q, v in zip(pred_dict[sector]['quarters'], pred_dict[sector]['values'])
+                    ]
+                })
+    forecast_str = json.dumps(forecast_stats, indent=2) if forecast_stats else 'Geen prognosedata beschikbaar.'
+
+    prompt = f"""Je bent een arbeidsmarktanalist die ziekteverzuimpercentages analyseert.
+
+HISTORISCHE DATA ({year_min}-{year_max}):
+{data_str}
+
+KWARTAALPROGNOSES (seizoensgecorrigeerde lineaire regressie):
+{forecast_str}
+
+Geef je antwoord in exact dit formaat, twee secties gescheiden door "###":
+
+Eerste sectie: 2-3 zinnen historische trendanalyse van de data.
+###
+Tweede sectie: 2-3 zinnen over de verwachting voor de komende 4 kwartalen op basis van de prognosedata, inclusief seizoenspatroon en trendrichting als onderbouwing.
+
+Begin elke sectie direct met de inhoud, zonder labels of koppen. Schrijf in professioneel Nederlands. Wees beknopt en specifiek."""
 
     api_key = os.getenv('DEEPSEEK_API_KEY', '').strip()
     base_url = 'https://api.deepseek.com'
@@ -276,12 +305,14 @@ def analyze_with_ai(sector_data, selected_sectors, year_min, year_max):
     try:
         response = client.chat.completions.create(
             model=model,
-            messages=[
-                {'role': 'user', 'content': prompt}
-            ],
-            max_tokens=300,
+            messages=[{'role': 'user', 'content': prompt}],
+            max_tokens=500,
             temperature=0.7
         )
-        return response.choices[0].message.content
+        full_text = response.choices[0].message.content
+        parts = full_text.split('###', 1)
+        analysis = parts[0].strip()
+        forecast = parts[1].strip() if len(parts) > 1 else ''
+        return analysis, forecast
     except Exception as e:
-        return f'Fout bij AI-analyse: {str(e)}'
+        return f'Fout bij AI-analyse: {str(e)}', ''

@@ -26,16 +26,17 @@ def api_analyze():
         selected_sectors = data.get('sectors', [])
         year_min = data.get('year_min', 2021)
         year_max = data.get('year_max', 2025)
-        
+        pred_dict = data.get('pred_dict', None)
+
         # Load and prepare data
         df, _ = load_data_from_db()
         sector_data, _ = build_sector_data(df)
-        
+
         # Get AI analysis
-        analysis = analyze_with_ai(sector_data, selected_sectors, year_min, year_max)
-        
-        return jsonify({'analysis': analysis})
-    
+        analysis, forecast = analyze_with_ai(sector_data, selected_sectors, year_min, year_max, pred_dict)
+
+        return jsonify({'analysis': analysis, 'forecast': forecast})
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
