@@ -169,6 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (yearMin) yearMin.addEventListener('change', updateFilter);
     if (yearMax) yearMax.addEventListener('change', updateFilter);
 
-    // Apply the default filter window immediately on load
-    updateFilter();
+    // On initial load: only build the plot, no AI call
+    rebuildPlot(allSectors);
 });
