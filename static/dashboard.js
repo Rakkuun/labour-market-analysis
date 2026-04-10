@@ -160,8 +160,8 @@ function renderAnalysis(selectedSectors) {
     const forecastPanel = document.getElementById('forecastPanel');
     const forecastText = document.getElementById('forecastText');
 
-    if (placeholder) placeholder.style.display = 'none';
-    if (historyPanel) { historyPanel.style.display = 'block'; analysisText.innerHTML = '<em class="text-muted">AI-analyse wordt gegenereerd...</em>'; }
+    if (placeholder) { placeholder.style.display = 'block'; placeholder.innerHTML = '<em class="text-muted">AI-analyse wordt gegenereerd...</em>'; }
+    if (historyPanel) historyPanel.style.display = 'none';
     if (forecastPanel) forecastPanel.style.display = 'none';
 
     // Build pred_dict subset for selected sectors
@@ -187,8 +187,12 @@ function renderAnalysis(selectedSectors) {
     .then(data => {
         if (data.error) {
             analysisText.textContent = `Fout: ${data.error}`;
+            if (placeholder) placeholder.style.display = 'none';
+            if (historyPanel) historyPanel.style.display = 'block';
         } else {
             analysisText.textContent = data.analysis;
+            if (placeholder) placeholder.style.display = 'none';
+            if (historyPanel) historyPanel.style.display = 'block';
             if (forecastPanel && forecastText && data.forecast) {
                 forecastText.textContent = data.forecast;
                 forecastPanel.style.display = 'block';
@@ -196,6 +200,8 @@ function renderAnalysis(selectedSectors) {
         }
     })
     .catch(error => {
+        if (placeholder) placeholder.style.display = 'none';
+        if (historyPanel) historyPanel.style.display = 'block';
         analysisText.textContent = `Fout bij analysevraag: ${error}`;
     });
 }
