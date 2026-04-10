@@ -86,31 +86,64 @@ def build_sector_data(df):
     return sector_data, sectors
 
 
-def create_plotly_figure(sector_data, sectors):
+def create_plotly_figure(sector_data, sectors, pred_dict=None):
     """Create Plotly figure for all sectors.
     
     Args:
         sector_data: dict with sector information
         sectors: list of sector names
+        pred_dict: optional dict {sector: predicted_value} for dashed forecast lines
         
     Returns:
         str: HTML representation of the Plotly figure
     """
     fig = go.Figure()
-    
-    for sector in sectors:
+
+    COLORS = [
+        '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
+        '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52',
+        '#1F77B4', '#FF7F0E', '#2CA02C', '#D62728', '#9467BD',
+        '#8C564B', '#E377C2', '#7F7F7F', '#BCBD22', '#17BECF',
+        '#AEC7E8', '#FFBB78', '#98DF8A', '#FF9896', '#C5B0D5',
+        '#C49C94', '#F7B6D2', '#C7C7C7', '#DBDB8D', '#9EDAE5',
+        '#393B79', '#637939', '#8C6D31', '#843C39', '#7B4173',
+        '#5254A3', '#B5CF6B', '#E7CB94', '#AD494A', '#A55194'
+    ]
+
+    for i, sector in enumerate(sectors):
+        color = COLORS[i % len(COLORS)]
         quarters = sector_data[sector]['quarters']
         values = sector_data[sector]['values']
+        years = sector_data[sector]['years']
         
         fig.add_trace(go.Scatter(
             x=quarters,
             y=values,
             mode='lines+markers',
             name=sector,
+            legendgroup=sector,
             visible=True,
+            line=dict(color=color),
+            marker=dict(color=color),
             hovertemplate='<b>%{text}</b><br>Kwartaal: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>',
             text=[sector] * len(values)
         ))
+
+        if pred_dict and sector in pred_dict and quarters:
+            pred_quarters = pred_dict[sector]['quarters']
+            pred_values = pred_dict[sector]['values']
+            fig.add_trace(go.Scatter(
+                x=[quarters[-1]] + pred_quarters,
+                y=[values[-1]] + pred_values,
+                mode='lines+markers',
+                name=f"{sector} (prognose)",
+                legendgroup=sector,
+                showlegend=False,
+                line=dict(dash='dot', color=color),
+                marker=dict(color=color),
+                hovertemplate='<b>%{text}</b><br>%{x}<br>Prognose: %{y:.2f}%<extra></extra>',
+                text=[sector] * (1 + len(pred_quarters))
+            ))
     
     fig.update_layout(
         title='Ziekteverzuimpercentage per sector over tijd',
@@ -162,8 +195,18 @@ def prepare_context(df, pred_df):
     default_max_year = min(max_year, current_year)
     default_min_year = max(min_year, default_max_year - 4)
     
+    # Build predictions dict {sector: {quarters: [...], values: [...]}} for chart
+    pred_dict = {}
+    if not pred_df.empty and 'Quarter' in pred_df.columns:
+        for _, row in pred_df.iterrows():
+            sector = str(row['Sector'])
+            if sector not in pred_dict:
+                pred_dict[sector] = {'quarters': [], 'values': []}
+            pred_dict[sector]['quarters'].append(str(row['Quarter']))
+            pred_dict[sector]['values'].append(float(row['Predicted_Absenteeism']))
+
     # Create visualizations and tables
-    plot_html = create_plotly_figure(sector_data, sectors)
+    plot_html = create_plotly_figure(sector_data, sectors, pred_dict)
     table = df.head(20).to_html(index=False)
     pred_table = pred_df.to_html(index=False) if not pred_df.empty else '<p>No predictions available.</p>'
     
@@ -171,6 +214,7 @@ def prepare_context(df, pred_df):
         'plot_html': plot_html,
         'sectors': sectors,
         'sector_data_json': json.dumps(sector_data),
+        'predictions_json': json.dumps(pred_dict),
         'years': years,
         'min_year': min_year,
         'max_year': max_year,
