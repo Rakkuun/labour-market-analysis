@@ -7,6 +7,12 @@ import pandas as pd
 import sqlite3
 import json
 import plotly.graph_objects as go
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Load environment variables
+load_dotenv()
 
 
 def load_data_from_db():
@@ -173,3 +179,65 @@ def prepare_context(df, pred_df):
         'table': table,
         'pred_table': pred_table
     }
+
+
+def analyze_with_ai(sector_data, selected_sectors, year_min, year_max):
+    """Analyze sector trends using DeepSeek AI.
+    
+    Args:
+        sector_data: dict with sector information
+        selected_sectors: list of selected sector names
+        year_min: minimum year for analysis
+        year_max: maximum year for analysis
+        
+    Returns:
+        str: AI-generated analysis text
+    """
+    # Build data summary for AI
+    stats = []
+    for sector in selected_sectors:
+        quarters = sector_data[sector]['quarters']
+        values = sector_data[sector]['values']
+        years = sector_data[sector]['years']
+        filtered_values = []
+        for i in range(len(years)):
+            if year_min <= years[i] <= year_max:
+                filtered_values.append(values[i])
+        if filtered_values:
+            start = filtered_values[0]
+            end = filtered_values[-1]
+            avg = sum(filtered_values) / len(filtered_values)
+            min_val = min(filtered_values)
+            max_val = max(filtered_values)
+            stats.append({
+                'sector': sector,
+                'start': round(start, 2),
+                'end': round(end, 2),
+                'avg': round(avg, 2),
+                'min': round(min_val, 2),
+                'max': round(max_val, 2),
+                'quarters': len(filtered_values)
+            })
+    if not stats:
+        return 'Geen data beschikbaar voor de geselecteerde periode.'
+    data_str = json.dumps(stats, indent=2)
+    prompt = f"""Je bent een arbeidsmarktanalist die grafieken met ziekteverzuimpercentages analyseert.\n\nAnalyseer deze data voor sectoren in Nederland van {year_min} tot {year_max}:\n{data_str}\n\nGeef een korte, professionele trendanalyse in Nederlands (2-3 zinnen max). Focus op:\n1. Trends (op/neerwaartse beweging)\n2. Vergelijking tussen sectoren (als meer dan 1)\n3. Opvallende patronen of anomalieën\n\nWees beknopt en specifiek."""
+
+    api_key = os.getenv('DEEPSEEK_API_KEY', '').strip()
+    base_url = 'https://api.deepseek.com'
+    model = 'deepseek-chat'
+    if not api_key:
+        raise Exception('DeepSeek API-key niet geconfigureerd. Voeg DEEPSEEK_API_KEY toe aan .env')
+    client = OpenAI(api_key=api_key, base_url=base_url)
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {'role': 'user', 'content': prompt}
+            ],
+            max_tokens=300,
+            temperature=0.7
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        return f'Fout bij AI-analyse: {str(e)}'

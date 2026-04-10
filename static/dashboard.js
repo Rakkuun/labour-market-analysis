@@ -83,7 +83,7 @@ function updateFilter() {
 }
 
 /**
- * Render a textual analysis of the selected sectors and period.
+ * Render a textual analysis of the selected sectors and period using AI.
  */
 function renderAnalysis(selectedSectors) {
     const analysisText = document.getElementById('analysisText');
@@ -91,68 +91,38 @@ function renderAnalysis(selectedSectors) {
 
     const yearMin = parseInt(document.getElementById('yearMin').value) || minYear;
     const yearMax = parseInt(document.getElementById('yearMax').value) || maxYear;
-    const selectedCount = selectedSectors.length;
-
-    if (selectedCount === 0) {
+    
+    if (selectedSectors.length === 0) {
         analysisText.textContent = 'Selecteer sectoren om een trendanalyse te ontvangen.';
         return;
     }
 
-    const stats = selectedSectors.map(sector => getSectorStats(sector, yearMin, yearMax));
-    const validStats = stats.filter(stat => stat.count > 0);
+    // Show loading state
+    analysisText.innerHTML = '<em class="text-muted">AI-analyse wordt gegenereerd...</em>';
 
-    if (validStats.length === 0) {
-        analysisText.textContent = `Er is geen kwartaaldata voor ${yearMin}-${yearMax}. Kies een ander jaarbereik.`;
-        return;
-    }
-
-    if (validStats.length === 1) {
-        const stat = validStats[0];
-        const trendLabel = getTrendLabel(stat.changePct);
-        analysisText.textContent = `${stat.sector} toont een ${trendLabel} trend in ${yearMin}-${yearMax}. Het verzuim begon rond ${stat.start.toFixed(2)}% en eindigde op ${stat.end.toFixed(2)}%, een verandering van ${stat.changePct.toFixed(1)}% over ${stat.count} kwartalen.`;
-        return;
-    }
-
-    if (validStats.length === 2) {
-        const [a, b] = validStats;
-        const comparison = a.end > b.end ? `${a.sector} eindigt hoger dan ${b.sector}` : `${b.sector} eindigt hoger dan ${a.sector}`;
-        analysisText.textContent = `${a.sector} en ${b.sector} laten beide trends zien over ${yearMin}-${yearMax}. ${a.sector}: ${getTrendLabel(a.changePct)}. ${b.sector}: ${getTrendLabel(b.changePct)}. ${comparison}.`;
-        return;
-    }
-
-    const overall = validStats.reduce((acc, stat) => ({
-        changePct: acc.changePct + stat.changePct,
-        sectors: acc.sectors + 1
-    }), { changePct: 0, sectors: 0 });
-    const avgChange = overall.changePct / overall.sectors;
-    analysisText.textContent = `Je bekijkt ${validStats.length} sectoren in ${yearMin}-${yearMax}. De gemiddelde trend is ${getTrendLabel(avgChange)} over de geselecteerde periode.`;
-}
-
-function getSectorStats(sector, yearMin, yearMax) {
-    const quarters = sectorData[sector].quarters;
-    const values = sectorData[sector].values;
-    const years = sectorData[sector].years;
-
-    const filtered = [];
-    for (let i = 0; i < years.length; i++) {
-        if (years[i] >= yearMin && years[i] <= yearMax) {
-            filtered.push(values[i]);
+    // Call the API endpoint
+    fetch('/api/analyze', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            sectors: selectedSectors,
+            year_min: yearMin,
+            year_max: yearMax
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            analysisText.textContent = `Fout: ${data.error}`;
+        } else {
+            analysisText.textContent = data.analysis;
         }
-    }
-
-    if (filtered.length === 0) {
-        return { sector, count: 0, start: 0, end: 0, changePct: 0 };
-    }
-
-    const start = filtered[0];
-    const end = filtered[filtered.length - 1];
-    const changePct = start === 0 ? 0 : ((end - start) / start) * 100;
-    return { sector, count: filtered.length, start, end, changePct };
-}
-
-function getTrendLabel(changePct) {
-    if (Math.abs(changePct) < 1) return 'stabiele';
-    return changePct > 0 ? 'opwaartse' : 'neerwaartse';
+    })
+    .catch(error => {
+        analysisText.textContent = `Fout bij analysevraag: ${error}`;
+    });
 }
 
 /**
