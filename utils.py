@@ -1,18 +1,16 @@
-"""
-Utility functions for data processing and visualization.
-"""
-import re
-import datetime
-import pandas as pd
-import sqlite3
-import json
-import plotly.graph_objects as go
-import os
-from dotenv import load_dotenv
-from openai import OpenAI
+"""Re-export shim for backwards compatibility.
 
-# Load environment variables
-load_dotenv()
+All logic has been split into focused modules:
+  db.py      - database access and sector data building
+  chart.py   - Plotly figure creation
+  ai.py      - DeepSeek AI analysis and company lookup
+  context.py - Flask template context preparation
+"""
+from db import load_data_from_db, build_sector_data          # noqa: F401
+from chart import create_plotly_figure                        # noqa: F401
+from ai import analyze_with_ai, lookup_company_info           # noqa: F401
+from context import prepare_context                           # noqa: F401
+
 
 
 def load_data_from_db():

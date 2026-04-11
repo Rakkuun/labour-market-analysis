@@ -5,7 +5,9 @@ A web application for analyzing Dutch labour market data,
 specifically absenteeism rates across different sectors.
 """
 from flask import Flask, render_template, request, jsonify
-from utils import load_data_from_db, prepare_context, build_sector_data, analyze_with_ai, lookup_company_info
+from db import load_data_from_db, build_sector_data
+from ai import analyze_with_ai, lookup_company_info
+from context import prepare_context
 
 app = Flask(__name__)
 
