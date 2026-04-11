@@ -234,11 +234,11 @@ function rebuildPlot(selectedSectors) {
 
     const layout = {
         title: 'Ziekteverzuimpercentage per sector over tijd',
-        xaxis: { title: 'Kwartaal' },
-        yaxis: { title: 'Ziekteverzuim %' },
+        xaxis: { title: { text: 'Kwartaal', standoff: 20 }, tickangle: -45 },
+        yaxis: { title: { text: 'Ziekteverzuim %', standoff: 10 } },
         legend: { title: { text: 'Sector' } },
         hovermode: 'closest',
-        margin: { l: 40, r: 40, t: 70, b: 40 },
+        margin: { l: 70, r: 40, t: 70, b: 80 },
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)'
     };

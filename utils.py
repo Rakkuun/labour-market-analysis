@@ -147,11 +147,11 @@ def create_plotly_figure(sector_data, sectors, pred_dict=None):
     
     fig.update_layout(
         title='Ziekteverzuimpercentage per sector over tijd',
-        xaxis_title='Kwartaal',
-        yaxis_title='Ziekteverzuim %',
+        xaxis=dict(title=dict(text='Kwartaal', standoff=20), tickangle=-45),
+        yaxis=dict(title=dict(text='Ziekteverzuim %', standoff=10)),
         legend_title='Sector',
         hovermode='closest',
-        margin=dict(l=40, r=40, t=70, b=40),
+        margin=dict(l=70, r=40, t=70, b=80),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)'
     )
