@@ -20,6 +20,55 @@
 
     <!-- Main Content -->
     <div class="container-lg">
+        <!-- Company Lookup -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="company-panel p-4 rounded shadow-sm bg-white">
+                    <h5 class="mb-1"><i class="bi bi-building"></i> Bedrijfsprofiel</h5>
+                    <p class="text-muted small mb-3">Voer een bedrijfsnaam in om de CBS-classificatie (SBI 2008) automatisch op te zoeken en op te slaan.</p>
+                    <div class="d-flex gap-2 mb-3">
+                        <input type="text" id="companyName" class="form-control" placeholder="Bijv. Albert Heijn, ASML, Rijksoverheid…" style="max-width:400px;">
+                        <button type="button" class="btn btn-primary" onclick="lookupCompany()">
+                            <i class="bi bi-search"></i> Zoeken
+                        </button>
+                        <button type="button" class="btn btn-outline-danger" id="clearCompanyBtn" onclick="clearCompany()" style="display:none;">
+                            <i class="bi bi-trash"></i> Verwijder profiel
+                        </button>
+                    </div>
+                    <div id="companyLoading" style="display:none;" class="text-muted small mb-2"><em>Bezig met ophalen…</em></div>
+                    <div id="companyError" style="display:none;" class="text-danger small mb-2"></div>
+                    <div id="companyResult" style="display:none;">
+                        <div class="row g-3">
+                            <div class="col-6 col-sm-3">
+                                <div class="company-info-card">
+                                    <div class="company-info-label">Bedrijfssector</div>
+                                    <div class="company-info-value" id="infoBedrijfssector">-</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="company-info-card">
+                                    <div class="company-info-label">Bedrijfstak</div>
+                                    <div class="company-info-value" id="infoBedrijfstak">-</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="company-info-card">
+                                    <div class="company-info-label">Bedrijfsklasse</div>
+                                    <div class="company-info-value" id="infoBedrijfsklasse">-</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="company-info-card">
+                                    <div class="company-info-label">Bedrijfsgrootte</div>
+                                    <div class="company-info-value" id="infoBedrijfsgrootte">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Filters and Plot -->
         <div class="row mb-5">
             <!-- Sidebar Filters -->

@@ -2,6 +2,94 @@
  * Dashboard interactivity functions
  */
 
+// ── Cookie helpers ────────────────────────────────────────────────────────────
+
+function setCookie(name, value, days) {
+    const d = new Date();
+    d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${encodeURIComponent(value)};expires=${d.toUTCString()};path=/;SameSite=Lax`;
+}
+
+function getCookie(name) {
+    const key = name + '=';
+    for (const part of document.cookie.split(';')) {
+        const c = part.trim();
+        if (c.startsWith(key)) return decodeURIComponent(c.substring(key.length));
+    }
+    return null;
+}
+
+// ── Company lookup ────────────────────────────────────────────────────────────
+
+function lookupCompany() {
+    const name = document.getElementById('companyName').value.trim();
+    if (!name) return;
+
+    document.getElementById('companyResult').style.display = 'none';
+    document.getElementById('companyError').style.display = 'none';
+    document.getElementById('companyLoading').style.display = 'block';
+
+    fetch('/api/lookup-company', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company_name: name })
+    })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('companyLoading').style.display = 'none';
+        if (data.error) {
+            document.getElementById('companyError').textContent = data.error;
+            document.getElementById('companyError').style.display = 'block';
+            return;
+        }
+        setCookie('company_name', name, 365);
+        setCookie('bedrijfssector', data.bedrijfssector || '', 365);
+        setCookie('bedrijfstak', data.bedrijfstak || '', 365);
+        setCookie('bedrijfsklasse', data.bedrijfsklasse || '', 365);
+        setCookie('bedrijfsgrootte', data.bedrijfsgrootte || '', 365);
+        showCompanyResult(data);
+        document.getElementById('clearCompanyBtn').style.display = 'inline-flex';
+    })
+    .catch(err => {
+        document.getElementById('companyLoading').style.display = 'none';
+        document.getElementById('companyError').textContent = `Fout: ${err}`;
+        document.getElementById('companyError').style.display = 'block';
+    });
+}
+
+function showCompanyResult(data) {
+    document.getElementById('infoBedrijfssector').textContent = data.bedrijfssector || '-';
+    document.getElementById('infoBedrijfstak').textContent = data.bedrijfstak || 'Niet beschikbaar';
+    document.getElementById('infoBedrijfsklasse').textContent = data.bedrijfsklasse || 'Niet beschikbaar';
+    document.getElementById('infoBedrijfsgrootte').textContent = data.bedrijfsgrootte || '-';
+    document.getElementById('companyResult').style.display = 'block';
+}
+
+function clearCompany() {
+    const cookieNames = ['company_name', 'bedrijfssector', 'bedrijfstak', 'bedrijfsklasse', 'bedrijfsgrootte'];
+    cookieNames.forEach(name => setCookie(name, '', -1));
+    document.getElementById('companyName').value = '';
+    document.getElementById('companyResult').style.display = 'none';
+    document.getElementById('companyError').style.display = 'none';
+    document.getElementById('clearCompanyBtn').style.display = 'none';
+}
+
+function restoreCompanyFromCookies() {
+    const name = getCookie('company_name');
+    if (!name) return;
+    document.getElementById('companyName').value = name;
+    const sector = getCookie('bedrijfssector');
+    const tak = getCookie('bedrijfstak');
+    const klasse = getCookie('bedrijfsklasse');
+    const grootte = getCookie('bedrijfsgrootte');
+    if (sector || tak || klasse || grootte) {
+        showCompanyResult({ bedrijfssector: sector, bedrijfstak: tak, bedrijfsklasse: klasse, bedrijfsgrootte: grootte });
+        document.getElementById('clearCompanyBtn').style.display = 'inline-flex';
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const COLORS = [
     '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A',
     '#19D3F3', '#FF6692', '#B6E880', '#FF97FF', '#FECB52',
@@ -238,6 +326,13 @@ function resetYears() {
  */
 document.addEventListener('DOMContentLoaded', function() {
     allSectors = Object.keys(sectorData);
+
+    // Restore saved company info from cookies
+    restoreCompanyFromCookies();
+
+    // Allow Enter key on company name input
+    const companyInput = document.getElementById('companyName');
+    if (companyInput) companyInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookupCompany(); });
 
     const select = document.getElementById('sectorFilter');
     if (select) {

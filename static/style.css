@@ -5,6 +5,35 @@
     --bs-info: #0dcaf0;
 }
 
+/* ── Company panel ────────────────────────────────────────────────────────── */
+.company-panel {
+    border-left: 4px solid #0d6efd;
+}
+
+.company-info-card {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px 14px;
+    height: 100%;
+}
+
+.company-info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+.company-info-value {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #212529;
+}
+/* ─────────────────────────────────────────────────────────────────────────── */
+
 body {
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;

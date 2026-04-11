@@ -316,3 +316,88 @@ Begin elke sectie direct met de inhoud, zonder labels of koppen. Schrijf in prof
         return analysis, forecast
     except Exception as e:
         return f'Fout bij AI-analyse: {str(e)}', ''
+
+
+def lookup_company_info(company_name):
+    """Use DeepSeek AI to determine CBS SBI 2008 classification for a Dutch company.
+
+    Returns a dict with keys: bedrijfssector, bedrijfstak, bedrijfsklasse, bedrijfsgrootte.
+    All values are exact matches with the Sector column in the CBS absenteeism dataset.
+    Returns null (None -> JSON null) for bedrijfstak/bedrijfsklasse when no match exists in the data.
+    """
+    # These are the EXACT values present in the Sector column of our CBS dataset.
+    # The AI must pick from these lists only.
+    prompt = f"""Je bent een expert in de Nederlandse CBS-bedrijfsclassificatie (SBI 2008).
+
+Gegeven bedrijfsnaam: "{company_name}"
+
+Kies voor dit bedrijf de meest passende waarden uit de onderstaande lijsten.
+Je MOET exact de vermelde waarden gebruiken — geen variaties, geen omschrijvingen.
+
+BEDRIJFSSECTOR (kies precies één waarde):
+A Landbouw, bosbouw en visserij
+B Delfstoffenwinning
+C Industrie
+D Energievoorziening
+E Waterbedrijven en afvalbeheer
+F Bouwnijverheid
+G Handel
+H Vervoer en opslag
+I Horeca
+J Informatie en communicatie
+K Financiële dienstverlening
+L Verhuur en handel van onroerend goed
+M Specialistische zakelijke diensten
+N Verhuur en overige zakelijke diensten
+O Openbaar bestuur en overheidsdiensten
+P Onderwijs
+Q Gezondheids- en welzijnszorg
+R Cultuur, sport en recreatie
+S Overige dienstverlening
+
+BEDRIJFSTAK (kies de meest passende waarde, of null als geen past):
+10-12 Voedings-, genotmiddelenindustrie
+17-18 Papier- en grafische industrie
+19-22 Raffinaderijen en chemie
+24-30, 33 Metaal-elektro industrie
+45 Autohandel en -reparatie
+46 Groothandel en handelsbemiddeling
+47 Detailhandel (niet in auto's)
+49 Vervoer over land
+86 Gezondheidszorg
+87 Verpleging en zorg met overnachting
+88 Welzijnszorg zonder overnachting
+812 Schoonmaakbedrijven
+
+BEDRIJFSKLASSE (kies de meest passende waarde, of null als geen past):
+861 Ziekenhuizen
+
+BEDRIJFSGROOTTE (kies precies één waarde):
+1 tot 10 werkzame personen
+10 tot 100 werkzame personen
+100 of meer werkzame personen
+
+Antwoord uitsluitend in JSON-formaat zonder extra tekst of markdown. Gebruik null (geen aanhalingstekens) als er geen passende waarde is voor bedrijfstak of bedrijfsklasse:
+{{"bedrijfssector": "...", "bedrijfstak": "..." or null, "bedrijfsklasse": "..." or null, "bedrijfsgrootte": "..."}}"""
+
+    api_key = os.getenv('DEEPSEEK_API_KEY', '').strip()
+    if not api_key:
+        raise Exception('DeepSeek API-key niet geconfigureerd.')
+    client = OpenAI(api_key=api_key, base_url='https://api.deepseek.com')
+    response = client.chat.completions.create(
+        model='deepseek-chat',
+        messages=[{'role': 'user', 'content': prompt}],
+        max_tokens=200,
+        temperature=0.0
+    )
+    content = response.choices[0].message.content.strip()
+    # Strip markdown code fences if the model adds them
+    if content.startswith('```'):
+        content = re.sub(r'^```[a-z]*\n?', '', content)
+        content = re.sub(r'\n?```$', '', content)
+    data = json.loads(content.strip())
+    # Normalise: replace empty strings with None for optional fields
+    for field in ('bedrijfstak', 'bedrijfsklasse'):
+        if not data.get(field):
+            data[field] = None
+    return data

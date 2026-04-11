@@ -5,7 +5,7 @@ A web application for analyzing Dutch labour market data,
 specifically absenteeism rates across different sectors.
 """
 from flask import Flask, render_template, request, jsonify
-from utils import load_data_from_db, prepare_context, build_sector_data, analyze_with_ai
+from utils import load_data_from_db, prepare_context, build_sector_data, analyze_with_ai, lookup_company_info
 
 app = Flask(__name__)
 
@@ -37,6 +37,20 @@ def api_analyze():
 
         return jsonify({'analysis': analysis, 'forecast': forecast})
 
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/lookup-company', methods=['POST'])
+def api_lookup_company():
+    """Look up CBS classification for a given company name using AI."""
+    try:
+        data = request.json
+        company_name = (data.get('company_name') or '').strip()
+        if not company_name:
+            return jsonify({'error': 'Geen bedrijfsnaam opgegeven'}), 400
+        result = lookup_company_info(company_name)
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
