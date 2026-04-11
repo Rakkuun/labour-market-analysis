@@ -86,6 +86,15 @@ def build_sector_data(df):
     return sector_data, sectors
 
 
+def _hover_text_color(hex_color):
+    """Return '#000000' or '#ffffff' based on WCAG relative luminance."""
+    h = hex_color.lstrip('#')
+    r, g, b = int(h[0:2], 16) / 255, int(h[2:4], 16) / 255, int(h[4:6], 16) / 255
+    def lin(c): return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+    lum = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+    return '#000000' if lum > 0.179 else '#ffffff'
+
+
 def create_plotly_figure(sector_data, sectors, pred_dict=None):
     """Create Plotly figure for all sectors.
     
@@ -125,6 +134,7 @@ def create_plotly_figure(sector_data, sectors, pred_dict=None):
             visible=True,
             line=dict(color=color),
             marker=dict(color=color),
+            hoverlabel=dict(font=dict(color=_hover_text_color(color))),
             hovertemplate='<b>%{text}</b><br>Kwartaal: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>',
             text=[sector] * len(values)
         ))
@@ -141,6 +151,7 @@ def create_plotly_figure(sector_data, sectors, pred_dict=None):
                 showlegend=False,
                 line=dict(dash='dot', color=color),
                 marker=dict(color=color),
+                hoverlabel=dict(font=dict(color=_hover_text_color(color))),
                 hovertemplate='<b>%{text}</b><br>%{x}<br>Prognose: %{y:.2f}%<extra></extra>',
                 text=[sector] * (1 + len(pred_quarters))
             ))

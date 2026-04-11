@@ -148,6 +148,16 @@ const COLORS = [
 
 let allSectors = [];
 
+// Returns '#000000' or '#ffffff' based on WCAG relative luminance of a hex background color
+function hoverTextColor(hex) {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const lin = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    const lum = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+    return lum > 0.179 ? '#000000' : '#ffffff';
+}
+
 /**
  * Rebuild the plot with selected sectors and year range
  * @param {string[]} selectedSectors - Array of selected sector names
@@ -190,6 +200,7 @@ function rebuildPlot(selectedSectors) {
             type: 'scatter',
             line: { color: color },
             marker: { color: color },
+            hoverlabel: { font: { color: hoverTextColor(color) } },
             hovertemplate: '<b>' + sector + '</b><br>Kwartaal: %{x}<br>Verzuim: %{y:.2f}%<extra></extra>'
         };
     });
@@ -227,6 +238,7 @@ function rebuildPlot(selectedSectors) {
                 type: 'scatter',
                 line: { dash: 'dot', color: color },
                 marker: { color: color },
+                hoverlabel: { font: { color: hoverTextColor(color) } },
                 hovertemplate: '<b>' + sector + '</b><br>%{x}<br>Prognose: %{y:.2f}%<extra></extra>'
             });
         }
