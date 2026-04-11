@@ -49,6 +49,7 @@ function lookupCompany() {
         setCookie('bedrijfsgrootte', data.bedrijfsgrootte || '', 365);
         showCompanyResult(data);
         document.getElementById('clearCompanyBtn').style.display = 'inline-flex';
+        applyCompanyFilter(data);
     })
     .catch(err => {
         document.getElementById('companyLoading').style.display = 'none';
@@ -65,6 +66,36 @@ function showCompanyResult(data) {
     document.getElementById('companyResult').style.display = 'block';
 }
 
+function applyCompanyFilter(data) {
+    if (!allSectors.length) return;
+    const select = document.getElementById('sectorFilter');
+    if (!select) return;
+
+    // Lowest level first: bedrijfsklasse > bedrijfstak > bedrijfssector
+    const levels = [
+        { value: data.bedrijfsklasse, label: 'Bedrijfsklasse' },
+        { value: data.bedrijfstak,    label: 'Bedrijfstak'    },
+        { value: data.bedrijfssector, label: 'Bedrijfssector' }
+    ];
+    let match = null;
+    for (const lvl of levels) {
+        if (lvl.value && allSectors.includes(lvl.value)) { match = lvl; break; }
+    }
+
+    const info = document.getElementById('companyFilterInfo');
+    if (!match) {
+        if (info) { info.textContent = 'Geen exacte CBS-match in de dataset — alle sectoren worden getoond.'; info.style.display = 'block'; }
+        return;
+    }
+
+    Array.from(select.options).forEach(opt => { opt.selected = opt.value === match.value; });
+    if (info) {
+        info.innerHTML = '<i class="bi bi-funnel-fill"></i> Grafiek gefilterd op <strong>' + match.label + '</strong>: <em>' + match.value + '</em>';
+        info.style.display = 'block';
+    }
+    updateFilter();
+}
+
 function clearCompany() {
     const cookieNames = ['company_name', 'bedrijfssector', 'bedrijfstak', 'bedrijfsklasse', 'bedrijfsgrootte'];
     cookieNames.forEach(name => setCookie(name, '', -1));
@@ -72,6 +103,19 @@ function clearCompany() {
     document.getElementById('companyResult').style.display = 'none';
     document.getElementById('companyError').style.display = 'none';
     document.getElementById('clearCompanyBtn').style.display = 'none';
+    const info = document.getElementById('companyFilterInfo');
+    if (info) info.style.display = 'none';
+    const select = document.getElementById('sectorFilter');
+    if (select) Array.from(select.options).forEach(opt => { opt.selected = true; });
+    // Rebuild plot without triggering AI analysis
+    rebuildPlot(allSectors);
+    // Reset analysis panel to placeholder state
+    const placeholder = document.getElementById('analysisPlaceholder');
+    const historyPanel = document.getElementById('historyPanel');
+    const forecastPanel = document.getElementById('forecastPanel');
+    if (placeholder) { placeholder.innerHTML = 'Pas een filter aan om een AI-trendanalyse te genereren.'; placeholder.style.display = 'block'; }
+    if (historyPanel) historyPanel.style.display = 'none';
+    if (forecastPanel) forecastPanel.style.display = 'none';
 }
 
 function restoreCompanyFromCookies() {
@@ -85,6 +129,7 @@ function restoreCompanyFromCookies() {
     if (sector || tak || klasse || grootte) {
         showCompanyResult({ bedrijfssector: sector, bedrijfstak: tak, bedrijfsklasse: klasse, bedrijfsgrootte: grootte });
         document.getElementById('clearCompanyBtn').style.display = 'inline-flex';
+        window._pendingCompanyFilterData = { bedrijfssector: sector, bedrijfstak: tak, bedrijfsklasse: klasse, bedrijfsgrootte: grootte };
     }
 }
 
@@ -345,6 +390,13 @@ document.addEventListener('DOMContentLoaded', function() {
     if (yearMin) yearMin.addEventListener('change', updateFilter);
     if (yearMax) yearMax.addEventListener('change', updateFilter);
 
-    // On initial load: only build the plot, no AI call
-    rebuildPlot(allSectors);
+    // Apply company filter from cookies if available (must happen after allSectors is set)
+    // applyCompanyFilter calls updateFilter() which calls rebuildPlot, so skip the fallback rebuildPlot.
+    if (window._pendingCompanyFilterData) {
+        applyCompanyFilter(window._pendingCompanyFilterData);
+        window._pendingCompanyFilterData = null;
+    } else {
+        // On initial load with no company filter: build the plot with all sectors
+        rebuildPlot(allSectors);
+    }
 });
