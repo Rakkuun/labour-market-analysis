@@ -12,6 +12,8 @@ COLORS = [
     '#5254A3', '#B5CF6B', '#E7CB94', '#AD494A', '#A55194',
 ]
 
+_QUARTER_COLORS = ['#4C6EF5', '#37B24D', '#F59F00', '#E03131']
+
 
 def hover_text_color(hex_color):
     """Return '#000000' or '#ffffff' for readable hover labels (WCAG luminance)."""
@@ -98,3 +100,74 @@ def create_plotly_figure(sector_data, sectors, pred_dict=None):
     )
 
     return fig.to_html(full_html=False, include_plotlyjs='cdn', div_id='plotly-chart')
+
+
+def create_seasonal_figure(df, last_n_years=5):
+    """Bar chart of average absenteeism per quarter (Q1-Q4) over the last N years.
+
+    Each quarter gets its own colour to visually separate the seasons.
+    A horizontal dashed line shows the overall average across all quarters.
+
+    Args:
+        df: cleaned_absenteeism DataFrame with columns Year, Period, AbsenteeismPercentage
+        last_n_years: how many recent years to include (default 5)
+
+    Returns:
+        str: self-contained HTML fragment
+    """
+    from db import extract_quarter_number
+
+    max_year = int(df['Year'].max())
+    min_year = max_year - last_n_years + 1
+    subset = df[df['Year'] >= min_year].copy()
+    subset['Q'] = subset['Period'].apply(extract_quarter_number)
+    subset = subset[subset['Q'].notna()]
+    subset['Q'] = subset['Q'].astype(int)
+
+    avg_per_q = (
+        subset.groupby('Q')['AbsenteeismPercentage']
+        .mean()
+        .reset_index()
+        .sort_values('Q')
+    )
+
+    overall_avg = avg_per_q['AbsenteeismPercentage'].mean()
+    quarter_labels = ['Q1 (jan–mrt)', 'Q2 (apr–jun)', 'Q3 (jul–sep)', 'Q4 (okt–dec)']
+
+    fig = go.Figure()
+
+    labels = [quarter_labels[int(row['Q']) - 1] for _, row in avg_per_q.iterrows()]
+    values = [round(row['AbsenteeismPercentage'], 2) for _, row in avg_per_q.iterrows()]
+    colors = [_QUARTER_COLORS[int(row['Q']) - 1] for _, row in avg_per_q.iterrows()]
+
+    fig.add_trace(go.Bar(
+        x=labels,
+        y=values,
+        marker_color=colors,
+        showlegend=False,
+        hovertemplate='<b>%{x}</b><br>Gemiddeld verzuim: %{y:.2f}%<extra></extra>',
+    ))
+
+    # Overall average reference line
+    fig.add_hline(
+        y=overall_avg,
+        line_dash='dash',
+        line_color='#555',
+        annotation_text=f'Gemiddeld {overall_avg:.2f}%',
+        annotation_position='top right',
+        annotation_font_size=12,
+    )
+
+    fig.update_layout(
+        title=f'Gemiddeld ziekteverzuim per kwartaal ({min_year}–{max_year}, alle sectoren)',
+        xaxis=dict(title=dict(text='Kwartaal', standoff=10)),
+        yaxis=dict(title=dict(text='Ziekteverzuim %', standoff=10)),
+        showlegend=False,
+        hovermode='closest',
+        margin=dict(l=70, r=40, t=70, b=60),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        bargap=0.35,
+    )
+
+    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='seasonal-chart')
