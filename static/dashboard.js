@@ -305,7 +305,7 @@ function renderAnalysis(selectedSectors) {
     const forecastPanel = document.getElementById('forecastPanel');
     const forecastText = document.getElementById('forecastText');
 
-    if (placeholder) { placeholder.style.display = 'block'; placeholder.innerHTML = '<em class="text-muted">AI-analyse wordt gegenereerd...</em>'; }
+    if (placeholder) { placeholder.style.display = 'block'; placeholder.innerHTML = '<span class="loading-spinner"><span class="spinner-dots"><span></span><span></span><span></span></span> AI-analyse wordt gegenereerd…</span>'; }
     if (historyPanel) historyPanel.style.display = 'none';
     if (forecastPanel) forecastPanel.style.display = 'none';
 
