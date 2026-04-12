@@ -171,3 +171,95 @@ def create_seasonal_figure(df, last_n_years=5):
     )
 
     return fig.to_html(full_html=False, include_plotlyjs=False, div_id='seasonal-chart')
+
+
+def create_flu_comparison_figure(df, flu_records, last_n_years=5):
+    """Dual-axis line chart: avg CBS absenteeism (all sectors) vs WHO FluNet griep positives.
+
+    Args:
+        df: cleaned_absenteeism DataFrame with Year, Period, AbsenteeismPercentage
+        flu_records: list of dicts from load_flu_data() — keys year, quarter, flu_positives
+        last_n_years: how many recent years to include (default 5)
+
+    Returns:
+        str: HTML fragment (no plotlyjs, already loaded on page)
+    """
+    from db import extract_quarter_number
+    import pandas as pd
+
+    max_year = int(df['Year'].max())
+    min_year = max_year - last_n_years + 1
+
+    # ── Absenteeism: average across all sectors per quarter ──────────────────
+    df = df[df['Year'] >= min_year].copy()
+    df['Q'] = df['Period'].apply(extract_quarter_number)
+    df = df[df['Q'].notna()]
+    df['Q'] = df['Q'].astype(int)
+    df['period_key'] = df['Year'].astype(str) + '-Q' + df['Q'].astype(str)
+
+    abs_avg = (
+        df.groupby('period_key')['AbsenteeismPercentage']
+        .mean()
+        .reset_index()
+        .rename(columns={'period_key': 'period', 'AbsenteeismPercentage': 'abs_pct'})
+        .sort_values('period')
+    )
+
+    # ── Flu: filter to same year range ───────────────────────────────────────
+    flu_df = pd.DataFrame(flu_records)
+    if not flu_df.empty:
+        flu_df = flu_df[flu_df['year'] >= min_year]
+        flu_df['period_key'] = flu_df['year'].astype(str) + '-Q' + flu_df['quarter'].astype(str)
+        flu_df = flu_df.sort_values('period_key')
+
+    fig = go.Figure()
+
+    # Primary y-axis: absenteeism
+    fig.add_trace(go.Scatter(
+        x=abs_avg['period'],
+        y=abs_avg['abs_pct'].round(2),
+        name='Gem. ziekteverzuim % (CBS)',
+        mode='lines+markers',
+        line=dict(color='#0d6efd', width=2),
+        marker=dict(color='#0d6efd', size=5),
+        hoverlabel=dict(bgcolor='#0d6efd', font=dict(color='#ffffff')),
+        hovertemplate='<b>Ziekteverzuim</b><br>%{x}<br>%{y:.2f}%<extra></extra>',
+    ))
+
+    # Secondary y-axis: flu positives
+    if not flu_df.empty:
+        fig.add_trace(go.Scatter(
+            x=flu_df['period_key'],
+            y=flu_df['flu_positives'],
+            name='Griepactiviteit (WHO FluNet NL)',
+            mode='lines+markers',
+            yaxis='y2',
+            line=dict(color='#f03e3e', width=2, dash='dot'),
+            marker=dict(color='#f03e3e', size=5),
+            hoverlabel=dict(bgcolor='#f03e3e', font=dict(color='#ffffff')),
+            hovertemplate='<b>Griep</b><br>%{x}<br>Positieven: %{y:.0f}<extra></extra>',
+        ))
+
+    fig.update_layout(
+        title=f'Ziekteverzuim vs. griepactiviteit ({min_year}–{max_year}, Nederland)',
+        xaxis=dict(title=dict(text='Kwartaal', standoff=20), tickangle=-45),
+        yaxis=dict(
+            title=dict(text='Ziekteverzuim %', standoff=10),
+            side='left',
+        ),
+        yaxis2=dict(
+            title=dict(text='Griepactiviteit (positieven)', standoff=10),
+            overlaying='y',
+            side='right',
+            showgrid=False,
+            zeroline=False,
+        ),
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+        hovermode='x unified',
+        margin=dict(l=70, r=80, t=80, b=80),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+    )
+
+    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='flu-comparison-chart')
+

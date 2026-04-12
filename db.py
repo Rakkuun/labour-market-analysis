@@ -75,3 +75,25 @@ def build_sector_data(df):
         }
 
     return sector_data, sectors
+
+
+def load_flu_data():
+    """Load quarterly flu positives from the flu_quarterly table.
+
+    Returns:
+        list[dict]: each dict has keys 'period', 'year', 'quarter', 'flu_positives'
+        Returns empty list if table does not exist.
+    """
+    conn = sqlite3.connect('data.db')
+    try:
+        df = pd.read_sql(
+            'SELECT year, quarter, period, flu_positives FROM flu_quarterly ORDER BY year, quarter',
+            conn,
+        )
+    except Exception:
+        return []
+    finally:
+        conn.close()
+
+    return df.to_dict(orient='records')
+

@@ -2,8 +2,8 @@
 import datetime
 import json
 
-from chart import create_plotly_figure, create_seasonal_figure
-from db import build_sector_data
+from chart import create_plotly_figure, create_seasonal_figure, create_flu_comparison_figure
+from db import build_sector_data, load_flu_data
 
 
 def build_pred_dict(pred_df):
@@ -36,6 +36,7 @@ def prepare_context(df, pred_df):
         return {
             'plot_html': '<p>No data available for plotting.</p>',
             'seasonal_chart_html': '',
+            'flu_chart_html': '',
             'sectors': [],
             'sector_data_json': '{}',
             'predictions_json': '{}',
@@ -60,6 +61,8 @@ def prepare_context(df, pred_df):
     pred_dict = build_pred_dict(pred_df)
     plot_html = create_plotly_figure(sector_data, sectors, pred_dict)
     seasonal_chart_html = create_seasonal_figure(df)
+    flu_data = load_flu_data()
+    flu_chart_html = create_flu_comparison_figure(df, flu_data)
 
     table = df.head(20).to_html(index=False)
     pred_table = pred_df.to_html(index=False) if not pred_df.empty else '<p>No predictions available.</p>'
@@ -67,6 +70,7 @@ def prepare_context(df, pred_df):
     return {
         'plot_html': plot_html,
         'seasonal_chart_html': seasonal_chart_html,
+        'flu_chart_html': flu_chart_html,
         'sectors': sectors,
         'sector_data_json': json.dumps(sector_data),
         'predictions_json': json.dumps(pred_dict),
