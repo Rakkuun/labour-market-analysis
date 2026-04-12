@@ -179,9 +179,29 @@ def lookup_company_info(company_name):
 
     data = json.loads(content.strip())
 
-    # Normalise: replace empty strings with None for optional fields
+    # Allowed exact values per field — AI must return one of these or null
+    _ALLOWED = {
+        'bedrijfstak': {
+            '10-12 Voedings-, genotmiddelenindustrie',
+            '17-18 Papier- en grafische industrie',
+            '19-22 Raffinaderijen en chemie',
+            '24-30, 33 Metaal-elektro industrie',
+            '45 Autohandel en -reparatie',
+            '46 Groothandel en handelsbemiddeling',
+            "47 Detailhandel (niet in auto's)",
+            '49 Vervoer over land',
+            '86 Gezondheidszorg',
+            '87 Verpleging en zorg met overnachting',
+            '88 Welzijnszorg zonder overnachting',
+            '812 Schoonmaakbedrijven',
+        },
+        'bedrijfsklasse': {'861 Ziekenhuizen'},
+    }
+
+    # Normalise: replace empty strings or non-whitelisted values with None
     for field in ('bedrijfstak', 'bedrijfsklasse'):
-        if not data.get(field):
+        val = data.get(field)
+        if not val or val not in _ALLOWED[field]:
             data[field] = None
 
     return data
