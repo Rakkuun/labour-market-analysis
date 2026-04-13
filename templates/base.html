@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}Labour Market Analysis{% endblock %}</title>
+    <title>{% block title %}peil.ai{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -15,7 +15,7 @@
         <div class="container-lg">
             <a class="navbar-brand" href="/">
                 <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" height="28" class="navbar-logo me-2" onerror="this.style.display='none'">
-                Labour Market Analysis
+                peil.ai
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
                     aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,7 +46,7 @@
     {% block content %}{% endblock %}
 
     <footer class="mt-5 py-4 text-center text-muted border-top">
-        <small>Labour Market Analysis &mdash; Data: CBS / WHO FluNet</small>
+        <small>peil.ai &mdash; Data: CBS / WHO FluNet</small>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
