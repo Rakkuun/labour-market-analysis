@@ -265,49 +265,89 @@ def create_flu_comparison_figure(df, flu_records, last_n_years=5):
 
 
 def create_hero_preview_figure(df, sector='G Handel', last_n_years=3):
-    """Small hero chart: real sector absenteeism vs a mock 'jouw bedrijf' line.
+    """Small hero chart: real sector absenteeism + 4-quarter forecast vs a mock 'jouw bedrijf' line.
+
+    Forecast uses the same linear regression + seasonal dummies + residual anchoring as predict.py.
+    The mock line covers only the historical period (not extended into the forecast).
 
     Args:
         df: cleaned_absenteeism DataFrame
         sector: sector name to use as benchmark line
-        last_n_years: number of recent years to include
+        last_n_years: number of recent years to show for the historical lines
 
     Returns:
         str: HTML fragment (no plotlyjs)
     """
-    max_year = int(df['Year'].max())
-    min_year = max_year - last_n_years + 1
-
     from db import extract_quarter_number
-    import pandas as pd
     import math
+    import numpy as np
+    from sklearn.linear_model import LinearRegression
 
-    subset = df[(df['Sector'] == sector) & (df['Year'] >= min_year)].copy()
-    subset['Q'] = subset['Period'].apply(extract_quarter_number)
-    subset = subset[subset['Q'].notna()]
-    subset['Q'] = subset['Q'].astype(int)
-    subset['period_key'] = subset['Year'].astype(str) + '-Q' + subset['Q'].astype(str)
+    # ── Build quarterly averages for the sector (all history, for model training) ──
+    sector_df = df[df['Sector'] == sector].copy()
+    sector_df['Q'] = sector_df['Period'].apply(extract_quarter_number)
+    sector_df = sector_df[sector_df['Q'].notna()]
+    sector_df['Q'] = sector_df['Q'].astype(int)
+    sector_df['TimeIndex'] = sector_df['Year'] + (sector_df['Q'] - 1) * 0.25
 
-    avg = (
-        subset.groupby('period_key')['AbsenteeismPercentage']
+    grouped = (
+        sector_df.groupby(['Year', 'Q', 'TimeIndex'])['AbsenteeismPercentage']
         .mean()
         .reset_index()
-        .sort_values('period_key')
+        .sort_values('TimeIndex')
     )
 
-    if avg.empty:
+    if len(grouped) < 4:
         return ''
 
-    real_x = avg['period_key'].tolist()
-    real_y = avg['AbsenteeismPercentage'].round(2).tolist()
+    # ── Train model (same as predict.py) ──────────────────────────────────────
+    time_idx = grouped['TimeIndex'].values
+    q_vals = grouped['Q'].values
+    X = np.column_stack([
+        time_idx,
+        (q_vals == 2).astype(float),
+        (q_vals == 3).astype(float),
+        (q_vals == 4).astype(float),
+    ])
+    y = grouped['AbsenteeismPercentage'].values
+    model = LinearRegression().fit(X, y)
 
-    # Mock "jouw bedrijf" line: sector average + fixed offset + subtle wave
-    mock_y = [round(v + 1.2 + 0.3 * math.sin(i * 1.1), 2) for i, v in enumerate(real_y)]
+    last_row = grouped.iloc[-1]
+    last_year = int(last_row['Year'])
+    last_q = int(last_row['Q'])
+    last_time = float(last_row['TimeIndex'])
+    last_actual = float(last_row['AbsenteeismPercentage'])
+
+    # Residual anchoring
+    x_last = np.array([[last_time, float(last_q == 2), float(last_q == 3), float(last_q == 4)]])
+    residual = last_actual - model.predict(x_last)[0]
+
+    # ── Generate 4 forecast quarters ──────────────────────────────────────────
+    forecast_x, forecast_y = [], []
+    for i in range(1, 5):
+        next_q_abs = last_q + i
+        next_year = last_year + (next_q_abs - 1) // 4
+        next_q_num = ((next_q_abs - 1) % 4) + 1
+        next_time = next_year + (next_q_num - 1) * 0.25
+        x_pred = np.array([[next_time, float(next_q_num == 2), float(next_q_num == 3), float(next_q_num == 4)]])
+        forecast_x.append(f'{next_year}-Q{next_q_num}')
+        forecast_y.append(round(model.predict(x_pred)[0] + residual, 2))
+
+    # ── Slice to last N years for display ─────────────────────────────────────
+    max_year = int(grouped['Year'].max())
+    min_year = max_year - last_n_years + 1
+    display = grouped[grouped['Year'] >= min_year]
+    display_keys = (display['Year'].astype(str) + '-Q' + display['Q'].astype(str)).tolist()
+    display_vals = display['AbsenteeismPercentage'].round(2).tolist()
+
+    # Mock "jouw bedrijf": historical period only, slightly above sector average
+    mock_y = [round(v + 1.2 + 0.3 * math.sin(i * 1.1), 2) for i, v in enumerate(display_vals)]
 
     fig = go.Figure()
 
+    # Historical benchmark line
     fig.add_trace(go.Scatter(
-        x=real_x, y=real_y,
+        x=display_keys, y=display_vals,
         mode='lines+markers',
         name='G Handel (CBS)',
         line=dict(color='#0d6efd', width=2),
@@ -315,11 +355,23 @@ def create_hero_preview_figure(df, sector='G Handel', last_n_years=3):
         hovertemplate='<b>Sector benchmark</b><br>%{x}: %{y:.2f}%<extra></extra>',
     ))
 
+    # Forecast line (connects from last historical point)
     fig.add_trace(go.Scatter(
-        x=real_x, y=mock_y,
+        x=[display_keys[-1]] + forecast_x,
+        y=[display_vals[-1]] + forecast_y,
+        mode='lines+markers',
+        name='Prognose (CBS trend)',
+        line=dict(color='#0d6efd', width=2, dash='dot'),
+        marker=dict(color='#0d6efd', size=5, symbol='circle-open'),
+        hovertemplate='<b>Prognose</b><br>%{x}: %{y:.2f}%<extra></extra>',
+    ))
+
+    # Mock "jouw bedrijf" — historical only
+    fig.add_trace(go.Scatter(
+        x=display_keys, y=mock_y,
         mode='lines+markers',
         name='Jouw bedrijf (voorbeeld)',
-        line=dict(color='#f59f00', width=2, dash='dot'),
+        line=dict(color='#f59f00', width=2),
         marker=dict(color='#f59f00', size=5),
         hovertemplate='<b>Jouw bedrijf</b><br>%{x}: %{y:.2f}%<extra></extra>',
     ))
