@@ -14,7 +14,7 @@ This is a Python web application to analyze Dutch labour market data, focusing o
 1. Fetch data: `python fetch_data.py`
 2. Preprocess: `python preprocess.py`
 3. Visualize: `python visualize.py`
-4. Analyze: `python ai_analyze.py`
+4. Analyze: `python predict.py`
 5. Run app: `python app.py`
 
 Open http://127.0.0.1:5000/ in browser.
@@ -39,7 +39,7 @@ Open http://127.0.0.1:5000/ in browser.
 1. **fetch_data.py**: Retrieves data from CBS API (currently dummy data) and stores in `absenteeism` table.
 2. **preprocess.py**: Cleans data, adds `Year` column, stores in `cleaned_absenteeism` table.
 3. **visualize.py**: Groups data by sector and year, plots trends, saves PNGs in `static/`.
-4. **ai_analyze.py**: Trains linear regression models per sector, predicts next year, stores in `predictions` table.
+4. **predict.py**: Trains linear regression models per sector, predicts next year, stores in `predictions` table.
 5. **app.py**: Flask app loads data from DB, renders HTML with tables and image links.
 
 ### Web App
@@ -54,7 +54,7 @@ Open http://127.0.0.1:5000/ in browser.
 - `fetch_data.py`: Data acquisition.
 - `preprocess.py`: Data cleaning.
 - `visualize.py`: Plot generation.
-- `ai_analyze.py`: ML analysis.
+- `predict.py`: ML predictions (linear regression per sector).
 - `app.py`: Web application.
 - `data.db`: SQLite database.
 - `static/`: Folder for images.
