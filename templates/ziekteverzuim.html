@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Ziekteverzuim — Labour Market Analysis{% endblock %}
+
+{% block content %}
+<div class="container-lg">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="pt-4 mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/tools">Tools</a></li>
+            <li class="breadcrumb-item active">Ziekteverzuim</li>
+        </ol>
+    </nav>
+
+    <!-- Company Lookup -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="company-panel p-4 rounded shadow-sm bg-white">
+                <h5 class="mb-1"><i class="bi bi-building"></i> Bedrijfsprofiel</h5>
+                <p class="text-muted small mb-3">Voer een bedrijfsnaam in om de CBS-classificatie (SBI 2008) automatisch op te zoeken en op te slaan.</p>
+                <div class="d-flex gap-2 mb-3">
+                    <input type="text" id="companyName" class="form-control" placeholder="Bijv. Albert Heijn, ASML, Rijksoverheid…" style="max-width:400px;">
+                    <button type="button" class="btn btn-primary" onclick="lookupCompany()">
+                        <i class="bi bi-search"></i> Zoeken
+                    </button>
+                    <button type="button" class="btn btn-outline-danger" id="clearCompanyBtn" onclick="clearCompany()" style="display:none;">
+                        <i class="bi bi-trash"></i> Verwijder profiel
+                    </button>
+                </div>
+                <div id="companyLoading" style="display:none;" class="mb-2">
+                    <span class="loading-spinner">
+                        <span class="spinner-dots"><span></span><span></span><span></span></span>
+                        Classificatie ophalen…
+                    </span>
+                </div>
+                <div id="companyError" style="display:none;" class="text-danger small mb-2"></div>
+                <div id="companyResult" style="display:none;">
+                    <div class="row g-3">
+                        <div class="col-6 col-sm-3">
+                            <div class="company-info-card">
+                                <div class="company-info-label">Bedrijfssector</div>
+                                <div class="company-info-value" id="infoBedrijfssector">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="company-info-card">
+                                <div class="company-info-label">Bedrijfstak</div>
+                                <div class="company-info-value" id="infoBedrijfstak">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="company-info-card">
+                                <div class="company-info-label">Bedrijfsklasse</div>
+                                <div class="company-info-value" id="infoBedrijfsklasse">-</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="company-info-card">
+                                <div class="company-info-label">Bedrijfsgrootte</div>
+                                <div class="company-info-value" id="infoBedrijfsgrootte">-</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="companyFilterInfo" class="company-filter-info mt-3" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters and Plot -->
+    <div class="row mb-5">
+        <!-- Sidebar Filters -->
+        <div class="col-lg-3">
+            <div class="filter-panel p-4">
+                <h5 class="mb-4">
+                    <i class="bi bi-funnel"></i> Filters
+                </h5>
+
+                <!-- Year Range Filter -->
+                <div class="mb-4">
+                    <h6 class="mb-3">Jaar bereik</h6>
+                    <div class="year-range-inputs">
+                        <input type="number" id="yearMin" class="form-control"
+                               min="{{ min_year }}" max="{{ max_year }}"
+                               value="{{ default_min_year }}" placeholder="Min">
+                        <input type="number" id="yearMax" class="form-control"
+                               min="{{ min_year }}" max="{{ max_year }}"
+                               value="{{ default_max_year }}" placeholder="Max">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-100"
+                            onclick="resetYears()">Reset years</button>
+                </div>
+
+                <hr>
+
+                <!-- Sector Filter -->
+                <div>
+                    <h6 class="mb-3">Sectoren</h6>
+                    <p class="text-muted small mb-3">Selecteer sectoren om in de grafiek te tonen.</p>
+                    <div class="d-grid gap-2 mb-3">
+                        <button type="button" class="btn btn-primary btn-sm btn-filter"
+                                onclick="selectAll()">
+                            <i class="bi bi-check-all"></i> Select all
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-filter"
+                                onclick="deselectAll()">
+                            <i class="bi bi-x-circle"></i> Deselect all
+                        </button>
+                    </div>
+                    <select id="sectorFilter" class="form-select" multiple>
+                        {% for sector in sectors %}
+                        <option value="{{ sector }}" selected>{{ sector }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Plot -->
+        <div class="col-lg-9">
+            <div class="plot-container">
+                {{ plot_html|safe }}
+            </div>
+            <div id="analysisPanel" class="analysis-panel mt-4 p-4 rounded shadow-sm bg-white">
+                <h5><i class="bi bi-stars"></i> Automatische analyse</h5>
+                <div id="historyPanel" style="display:none;">
+                    <h6><i class="bi bi-clock-history"></i> Historische trendanalyse</h6>
+                    <p id="analysisText" class="mb-0 text-muted"></p>
+                </div>
+                <p id="analysisPlaceholder" class="mb-0 text-muted">Pas een filter aan om een AI-trendanalyse te genereren.</p>
+                <div id="forecastPanel" class="mt-3 pt-3 border-top" style="display:none;">
+                    <h6><i class="bi bi-graph-up-arrow"></i> Verwachting komende kwartalen</h6>
+                    <p id="forecastText" class="mb-0 text-muted"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Over ziekteverzuim -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="p-4 rounded shadow-sm bg-white" style="border-left: 4px solid #0d6efd;">
+                <h4 class="mb-1"><i class="bi bi-bar-chart-line"></i> Over ziekteverzuim</h4>
+                <p class="text-muted small mb-3">Ziekteverzuim in Nederland kent een duidelijk seizoenspatroon. Het piekseizoen valt in Q1 (winter/griepseizoen) en Q4 (herfst), terwijl Q3 (zomer) traditioneel het laagste verzuim laat zien. Onderstaande grafiek toont het gemiddelde verzuim per kwartaal over de afgelopen vijf jaar.</p>
+                {{ seasonal_chart_html|safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Ziekteverzuim vs. griepactiviteit -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12">
+            <div class="p-4 rounded shadow-sm bg-white" style="border-left: 4px solid #f03e3e;">
+                <h4 class="mb-1"><i class="bi bi-virus"></i> Ziekteverzuim vs. griepactiviteit</h4>
+                <p class="text-muted small mb-3">Vergelijking van het gemiddeld landelijk ziekteverzuim (CBS, alle sectoren) met het aantal positieve grieptests per kwartaal in Nederland (WHO FluNet, 1996–2025). De gestippelde lijn toont griepactiviteit op de rechter as.</p>
+                {{ flu_chart_html|safe }}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    const sectorData = {{ sector_data_json|safe }};
+    const predictionData = {{ predictions_json|safe }};
+    const minYear = {{ min_year }};
+    const maxYear = {{ max_year }};
+    const defaultMinYear = {{ default_min_year }};
+    const defaultMaxYear = {{ default_max_year }};
+</script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+{% endblock %}

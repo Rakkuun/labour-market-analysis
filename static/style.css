@@ -89,6 +89,109 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.navbar-custom .navbar-brand {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.navbar-custom .navbar-brand:hover {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.navbar-custom .nav-link {
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 6px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Stat cards (homepage) ────────────────────────────────────────────────── */
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 24px 20px;
+    text-align: center;
+    height: 100%;
+}
+
+.stat-icon {
+    font-size: 1.6rem;
+    color: #0d6efd;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #212529;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6c757d;
+}
+
+/* ── Tool cards ───────────────────────────────────────────────────────────── */
+.tool-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 28px 24px;
+    height: 100%;
+    border-top: 3px solid #0d6efd;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.tool-card-link:hover .tool-card {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(13, 110, 253, 0.15);
+}
+
+.tool-card--disabled {
+    opacity: 0.6;
+    border-top-color: #adb5bd;
+}
+
+.tool-card-icon {
+    font-size: 2rem;
+    color: #0d6efd;
+    margin-bottom: 14px;
+}
+
+.tool-card--disabled .tool-card-icon {
+    color: #adb5bd;
+}
+
+.tool-card-title {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 8px;
+}
+
+.tool-card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 14px;
+}
+
+.tool-card-cta {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+
 .filter-panel {
     background: white;
     border-radius: 8px;

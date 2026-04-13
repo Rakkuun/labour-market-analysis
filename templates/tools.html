@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Tools — Labour Market Analysis{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5">
+
+    <div class="mb-5">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active">Tools</li>
+            </ol>
+        </nav>
+        <h1 class="h2 fw-bold mb-1" style="color:#212529;">Alle tools</h1>
+        <p class="text-muted">Kies een analyse-tool om te starten.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <a href="/tools/ziekteverzuim" class="tool-card-link text-decoration-none">
+                <div class="tool-card">
+                    <div class="tool-card-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+                    <h5 class="tool-card-title">Ziekteverzuim dashboard</h5>
+                    <p class="tool-card-text">Analyseer ziekteverzuimpercentages per sector (CBS, 1996–2025) met interactieve grafieken, seizoenspatronen, AI-trendanalyse en vergelijking met griepactiviteit.</p>
+                    <span class="tool-card-cta">Openen <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="tool-card tool-card--disabled">
+                <div class="tool-card-icon"><i class="bi bi-bar-chart-steps"></i></div>
+                <h5 class="tool-card-title">Sectorvergelijking <span class="badge bg-secondary ms-1" style="font-size:.65rem;vertical-align:middle;">Binnenkort</span></h5>
+                <p class="tool-card-text">Vergelijk arbeidsmarktindicatoren tussen sectoren onderling op meerdere dimensies.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="tool-card tool-card--disabled">
+                <div class="tool-card-icon"><i class="bi bi-geo-alt"></i></div>
+                <h5 class="tool-card-title">Regionale analyse <span class="badge bg-secondary ms-1" style="font-size:.65rem;vertical-align:middle;">Binnenkort</span></h5>
+                <p class="tool-card-text">Regionale uitsplitsing van arbeidsmarktdata per provincie en gemeente.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

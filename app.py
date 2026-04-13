@@ -13,11 +13,29 @@ app = Flask(__name__)
 
 
 @app.route('/')
-def index():
-    """Render the main dashboard page."""
+def home():
+    """Render the homepage."""
+    df, _ = load_data_from_db()
+    n_sectors = df['Sector'].nunique() if not df.empty else 0
+    min_year = int(df['Year'].min()) if not df.empty else 1996
+    max_year = int(df['Year'].max()) if not df.empty else 2025
+    return render_template('home.html', active_page='home',
+                           n_sectors=n_sectors, min_year=min_year, max_year=max_year)
+
+
+@app.route('/tools')
+def tools():
+    """Render the tools overview page."""
+    return render_template('tools.html', active_page='tools')
+
+
+@app.route('/tools/ziekteverzuim')
+def ziekteverzuim():
+    """Render the ziekteverzuim dashboard."""
     df, pred_df = load_data_from_db()
     context = prepare_context(df, pred_df)
-    return render_template('index.html', **context)
+    context['active_page'] = 'ziekteverzuim'
+    return render_template('ziekteverzuim.html', **context)
 
 
 @app.route('/api/analyze', methods=['POST'])

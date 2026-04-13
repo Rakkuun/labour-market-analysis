@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Home — Labour Market Analysis{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5">
+
+    <!-- Hero -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-lg-7">
+            <p class="text-primary fw-semibold mb-2 small text-uppercase letter-spacing-1">Nederlandse arbeidsmarkt</p>
+            <h1 class="display-5 fw-bold mb-3" style="color:#212529;">Datagedreven inzicht in de arbeidsmarkt</h1>
+            <p class="lead text-muted mb-4">Interactieve dashboards en analyses op basis van CBS-data — van ziekteverzuim tot sectorvergelijkingen, onderbouwd met AI-inzichten en WHO griepdata.</p>
+            <a href="/tools" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-grid me-2"></i>Bekijk alle tools
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-4 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-building"></i></div>
+                <div class="stat-value">{{ n_sectors }}</div>
+                <div class="stat-label">Sectoren</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-calendar3"></i></div>
+                <div class="stat-value">{{ min_year }}–{{ max_year }}</div>
+                <div class="stat-label">Datareeks</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-stars"></i></div>
+                <div class="stat-value">AI</div>
+                <div class="stat-label">Trendanalyse</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="bi bi-virus"></i></div>
+                <div class="stat-value">WHO</div>
+                <div class="stat-label">FluNet data</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool cards -->
+    <h2 class="h4 fw-bold mb-4" style="color:#212529;">Beschikbare tools</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4">
+            <a href="/tools/ziekteverzuim" class="tool-card-link text-decoration-none">
+                <div class="tool-card">
+                    <div class="tool-card-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+                    <h5 class="tool-card-title">Ziekteverzuim dashboard</h5>
+                    <p class="tool-card-text">Analyseer ziekteverzuimpercentages per sector (CBS, 1996–{{ max_year }}) met interactieve grafieken, seizoenspatronen, AI-trendanalyse en vergelijking met griepactiviteit.</p>
+                    <span class="tool-card-cta">Openen <i class="bi bi-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="tool-card tool-card--disabled">
+                <div class="tool-card-icon"><i class="bi bi-bar-chart-steps"></i></div>
+                <h5 class="tool-card-title">Sectorvergelijking <span class="badge bg-secondary ms-1" style="font-size:.65rem;vertical-align:middle;">Binnenkort</span></h5>
+                <p class="tool-card-text">Vergelijk arbeidsmarktindicatoren tussen sectoren onderling op meerdere dimensies.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="tool-card tool-card--disabled">
+                <div class="tool-card-icon"><i class="bi bi-geo-alt"></i></div>
+                <h5 class="tool-card-title">Regionale analyse <span class="badge bg-secondary ms-1" style="font-size:.65rem;vertical-align:middle;">Binnenkort</span></h5>
+                <p class="tool-card-text">Regionale uitsplitsing van arbeidsmarktdata per provincie en gemeente.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
