@@ -46,8 +46,69 @@
     {% block content %}{% endblock %}
 
     <footer class="mt-5 py-4 text-center text-muted border-top">
-        <small>peil.ai &mdash; Data: CBS / WHO FluNet</small>
+        <small>peil.ai | by Sander ten Kate</small>
+        <div class="mt-2 d-flex justify-content-center gap-3">
+            <a href="https://github.com/Rakkuun/labour-market-analysis" target="_blank" rel="noopener"
+               class="text-muted text-decoration-none" style="font-size:.85rem;">
+                <i class="bi bi-github me-1"></i>Open source
+            </a>
+            <a href="https://www.linkedin.com/in/sander-ten-kate-b220215a/" target="_blank" rel="noopener"
+               class="text-muted text-decoration-none" style="font-size:.85rem;">
+                <i class="bi bi-linkedin me-1"></i>Contact
+            </a>
+            <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal"
+               class="text-muted text-decoration-none" style="font-size:.85rem;">
+                <i class="bi bi-shield-lock me-1"></i>Privacy & cookies
+            </a>
+        </div>
     </footer>
+
+    <!-- Privacy & cookie modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="privacyModalLabel">
+                        <i class="bi bi-shield-lock me-2 text-primary"></i>Privacy- en cookieverklaring
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="fw-bold">Welke data slaan we op?</h6>
+                    <p class="text-muted small">peil.ai slaat <strong>geen</strong> data op onze servers op. We gebruiken uitsluitend cookies in jouw browser om jouw sessie-instellingen te onthouden.</p>
+
+                    <h6 class="fw-bold mt-3">Cookies — bedrijfsprofiel (SBI 2008 linker)</h6>
+                    <p class="text-muted small mb-2">Wanneer je op het ziekteverzuim-dashboard een bedrijfsnaam opzoekt via de <em>CBS SBI 2008-linker</em>, slaan we het resultaat op in cookies in jouw eigen browser. Zo hoef je je bedrijf niet bij elk bezoek opnieuw op te zoeken.</p>
+                    <table class="table table-sm table-bordered small mb-1">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cookie</th>
+                                <th>Inhoud</th>
+                                <th>Bewaartermijn</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>company_name</code></td><td>De ingevoerde bedrijfsnaam</td><td>365 dagen</td></tr>
+                            <tr><td><code>bedrijfssector</code></td><td>CBS-sector (bijv. G Handel)</td><td>365 dagen</td></tr>
+                            <tr><td><code>bedrijfstak</code></td><td>CBS-bedrijfstak</td><td>365 dagen</td></tr>
+                            <tr><td><code>bedrijfsklasse</code></td><td>CBS-bedrijfsklasse</td><td>365 dagen</td></tr>
+                            <tr><td><code>bedrijfsgrootte</code></td><td>Geschatte bedrijfsgrootte</td><td>365 dagen</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="text-muted small">Deze cookies verlaten jouw browser nooit — ze worden niet naar onze servers of derden gestuurd.</p>
+
+                    <h6 class="fw-bold mt-3">Cookies verwijderen</h6>
+                    <p class="text-muted small mb-0">Gebruik de knop <strong>"Verwijder profiel"</strong> op het ziekteverzuim-dashboard, of verwijder de cookies via de instellingen van je browser.</p>
+
+                    <h6 class="fw-bold mt-3">Externe databronnen</h6>
+                    <p class="text-muted small mb-0">De grafieken zijn gebaseerd op publiek beschikbare data van CBS en WHO FluNet. Er worden geen persoons- of bedrijfsgegevens naar deze bronnen gestuurd.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Begrepen</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     {% block page_scripts %}{% endblock %}
