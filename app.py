@@ -8,6 +8,7 @@ from flask import Flask, render_template, request, jsonify
 from db import load_data_from_db, build_sector_data
 from ai import analyze_with_ai, lookup_company_info
 from context import prepare_context
+from chart import create_hero_preview_figure
 
 app = Flask(__name__)
 
@@ -19,8 +20,10 @@ def home():
     n_sectors = df['Sector'].nunique() if not df.empty else 0
     min_year = int(df['Year'].min()) if not df.empty else 1996
     max_year = int(df['Year'].max()) if not df.empty else 2025
+    hero_chart_html = create_hero_preview_figure(df) if not df.empty else ''
     return render_template('home.html', active_page='home',
-                           n_sectors=n_sectors, min_year=min_year, max_year=max_year)
+                           n_sectors=n_sectors, min_year=min_year, max_year=max_year,
+                           hero_chart_html=hero_chart_html)
 
 
 @app.route('/tools')

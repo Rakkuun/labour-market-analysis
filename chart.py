@@ -263,3 +263,77 @@ def create_flu_comparison_figure(df, flu_records, last_n_years=5):
 
     return fig.to_html(full_html=False, include_plotlyjs=False, div_id='flu-comparison-chart')
 
+
+def create_hero_preview_figure(df, sector='G Handel', last_n_years=3):
+    """Small hero chart: real sector absenteeism vs a mock 'jouw bedrijf' line.
+
+    Args:
+        df: cleaned_absenteeism DataFrame
+        sector: sector name to use as benchmark line
+        last_n_years: number of recent years to include
+
+    Returns:
+        str: HTML fragment (no plotlyjs)
+    """
+    max_year = int(df['Year'].max())
+    min_year = max_year - last_n_years + 1
+
+    from db import extract_quarter_number
+    import pandas as pd
+    import math
+
+    subset = df[(df['Sector'] == sector) & (df['Year'] >= min_year)].copy()
+    subset['Q'] = subset['Period'].apply(extract_quarter_number)
+    subset = subset[subset['Q'].notna()]
+    subset['Q'] = subset['Q'].astype(int)
+    subset['period_key'] = subset['Year'].astype(str) + '-Q' + subset['Q'].astype(str)
+
+    avg = (
+        subset.groupby('period_key')['AbsenteeismPercentage']
+        .mean()
+        .reset_index()
+        .sort_values('period_key')
+    )
+
+    if avg.empty:
+        return ''
+
+    real_x = avg['period_key'].tolist()
+    real_y = avg['AbsenteeismPercentage'].round(2).tolist()
+
+    # Mock "jouw bedrijf" line: sector average + fixed offset + subtle wave
+    mock_y = [round(v + 1.2 + 0.3 * math.sin(i * 1.1), 2) for i, v in enumerate(real_y)]
+
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=real_x, y=real_y,
+        mode='lines+markers',
+        name='G Handel (CBS)',
+        line=dict(color='#0d6efd', width=2),
+        marker=dict(color='#0d6efd', size=5),
+        hovertemplate='<b>Sector benchmark</b><br>%{x}: %{y:.2f}%<extra></extra>',
+    ))
+
+    fig.add_trace(go.Scatter(
+        x=real_x, y=mock_y,
+        mode='lines+markers',
+        name='Jouw bedrijf (voorbeeld)',
+        line=dict(color='#f59f00', width=2, dash='dot'),
+        marker=dict(color='#f59f00', size=5),
+        hovertemplate='<b>Jouw bedrijf</b><br>%{x}: %{y:.2f}%<extra></extra>',
+    ))
+
+    fig.update_layout(
+        xaxis=dict(tickangle=-45, showgrid=False, tickfont=dict(size=10)),
+        yaxis=dict(title=dict(text='Verzuim %', standoff=5), tickfont=dict(size=10), showgrid=True, gridcolor='#f0f0f0'),
+        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1, font=dict(size=11)),
+        hovermode='x unified',
+        margin=dict(l=50, r=20, t=40, b=60),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        height=280,
+    )
+
+    return fig.to_html(full_html=False, include_plotlyjs=False, div_id='hero-preview-chart')
+

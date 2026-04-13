@@ -115,6 +115,14 @@ body {
     background: rgba(255, 255, 255, 0.15);
 }
 
+/* ── Hero preview chart card ─────────────────────────────────────────────── */
+.hero-chart-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(13, 110, 253, 0.1);
+    border: 1px solid #e9ecef;
+}
+
 /* ── Stat cards (homepage) ────────────────────────────────────────────────── */
 .stat-card {
     background: white;
