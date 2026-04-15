@@ -4,13 +4,44 @@ Labour Market Analysis Flask Application
 A web application for analyzing Dutch labour market data,
 specifically absenteeism rates across different sectors.
 """
-from flask import Flask, render_template, request, jsonify
-from db import load_data_from_db, build_sector_data
+import os
+from functools import wraps
+
+from flask import Flask, render_template, request, jsonify, Response
+from apscheduler.schedulers.background import BackgroundScheduler
+
+from db import load_data_from_db, build_sector_data, init_admin_tables, get_refresh_log, get_api_usage_stats
 from ai import analyze_with_ai, lookup_company_info, chat_with_agent
 from context import prepare_context
 from chart import create_hero_preview_figure
+from refresh import run_refresh
 
 app = Flask(__name__)
+
+# Initialise admin log tables on startup
+init_admin_tables()
+
+# ── Nightly scheduler ─────────────────────────────────────────────────────────
+_scheduler = BackgroundScheduler(daemon=True)
+_scheduler.add_job(lambda: run_refresh('cbs'), 'cron', hour=3, minute=0,
+                   id='nightly_cbs', misfire_grace_time=3600)
+_scheduler.add_job(lambda: run_refresh('flu'), 'cron', hour=3, minute=30,
+                   id='nightly_flu', misfire_grace_time=3600)
+_scheduler.start()
+
+# ── Admin Basic Auth ──────────────────────────────────────────────────────────
+def _require_admin(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        password = os.getenv('ADMIN_PASSWORD', '').strip()
+        auth = request.authorization
+        if not password or not auth or auth.password != password:
+            return Response(
+                'Toegang geweigerd', 401,
+                {'WWW-Authenticate': 'Basic realm="Admin"'}
+            )
+        return f(*args, **kwargs)
+    return decorated
 
 
 @app.route('/')
@@ -94,6 +125,32 @@ def api_chat():
         return jsonify({'reply': reply})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+# ── Admin ─────────────────────────────────────────────────────────────────────
+
+@app.route('/admin')
+@_require_admin
+def admin():
+    """Admin dashboard: refresh log + API usage stats."""
+    refresh_log = get_refresh_log(limit=30)
+    usage = get_api_usage_stats()
+    jobs = [
+        {'id': j.id, 'next_run': str(j.next_run_time)[:19] if j.next_run_time else '—'}
+        for j in _scheduler.get_jobs()
+    ]
+    return render_template('admin.html', refresh_log=refresh_log, usage=usage, jobs=jobs)
+
+
+@app.route('/admin/refresh', methods=['POST'])
+@_require_admin
+def admin_refresh():
+    """Trigger a manual data refresh."""
+    source = (request.json or {}).get('source', '').strip()
+    if source not in ('cbs', 'flu'):
+        return jsonify({'error': 'Ongeldige bron. Gebruik "cbs" of "flu".'}), 400
+    result = run_refresh(source)
+    return jsonify(result)
 
 
 if __name__ == '__main__':

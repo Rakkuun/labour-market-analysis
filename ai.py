@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import time
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -17,6 +18,22 @@ def _get_client():
     if not api_key:
         raise Exception('DeepSeek API-key niet geconfigureerd. Voeg DEEPSEEK_API_KEY toe aan .env')
     return OpenAI(api_key=api_key, base_url=_DEEPSEEK_BASE_URL)
+
+
+def _log(endpoint: str, response, duration_ms: int):
+    """Fire-and-forget usage log — never raises."""
+    try:
+        from db import log_api_usage
+        usage = response.usage
+        log_api_usage(
+            endpoint=endpoint,
+            model=getattr(response, 'model', _DEEPSEEK_MODEL),
+            tokens_in=usage.prompt_tokens if usage else 0,
+            tokens_out=usage.completion_tokens if usage else 0,
+            duration_ms=duration_ms,
+        )
+    except Exception:
+        pass
 
 
 # ── Trend analysis ────────────────────────────────────────────────────────────
@@ -87,12 +104,14 @@ Tweede sectie: 2-3 zinnen over de verwachting voor de komende 4 kwartalen op bas
 Begin elke sectie direct met de inhoud, zonder labels of koppen. Schrijf in professioneel Nederlands. Wees beknopt en specifiek."""
 
     try:
+        t0 = time.monotonic()
         response = _get_client().chat.completions.create(
             model=_DEEPSEEK_MODEL,
             messages=[{'role': 'user', 'content': prompt}],
             max_tokens=500,
             temperature=0.7,
         )
+        _log('analyze', response, int((time.monotonic() - t0) * 1000))
         parts = response.choices[0].message.content.split('###', 1)
         return parts[0].strip(), parts[1].strip() if len(parts) > 1 else ''
     except Exception as e:
@@ -164,12 +183,14 @@ def lookup_company_info(company_name):
     """
     prompt = _LOOKUP_PROMPT.format(company_name=company_name)
 
+    t0 = time.monotonic()
     response = _get_client().chat.completions.create(
         model=_DEEPSEEK_MODEL,
         messages=[{'role': 'user', 'content': prompt}],
         max_tokens=200,
         temperature=0.0,
     )
+    _log('lookup', response, int((time.monotonic() - t0) * 1000))
     content = response.choices[0].message.content.strip()
 
     # Strip markdown code fences if the model adds them
@@ -400,6 +421,7 @@ def chat_with_agent(message, history, df, pred_df, active_sector=None):
 
     client = _get_client()
     for _ in range(5):
+        t0 = time.monotonic()
         response = client.chat.completions.create(
             model=_DEEPSEEK_MODEL,
             messages=messages,
@@ -408,6 +430,7 @@ def chat_with_agent(message, history, df, pred_df, active_sector=None):
             max_tokens=600,
             temperature=0.5,
         )
+        _log('chat', response, int((time.monotonic() - t0) * 1000))
         msg = response.choices[0].message
         # Append as dict so it serialises cleanly for subsequent rounds
         messages.append(msg)
