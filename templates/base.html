@@ -46,15 +46,21 @@
     {% block content %}{% endblock %}
 
     <footer class="mt-5 py-4 text-center text-muted border-top">
-        <small>peil.ai | by Sander ten Kate</small>
+        <small>
+            peil.ai | by Sander ten Kate
+            <a href="https://www.linkedin.com/in/sander-ten-kate-b220215a/" target="_blank" rel="noopener"
+               class="text-muted ms-2" style="font-size:.85rem;">
+                <i class="bi bi-linkedin"></i>
+            </a>
+        </small>
         <div class="mt-2 d-flex justify-content-center gap-3">
             <a href="https://github.com/Rakkuun/labour-market-analysis" target="_blank" rel="noopener"
                class="text-muted text-decoration-none" style="font-size:.85rem;">
                 <i class="bi bi-github me-1"></i>Open source
             </a>
-            <a href="https://www.linkedin.com/in/sander-ten-kate-b220215a/" target="_blank" rel="noopener"
+            <a href="#" data-bs-toggle="modal" data-bs-target="#backlogModal"
                class="text-muted text-decoration-none" style="font-size:.85rem;">
-                <i class="bi bi-linkedin me-1"></i>Contact
+                <i class="bi bi-kanban me-1"></i>Product backlog
             </a>
             <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal"
                class="text-muted text-decoration-none" style="font-size:.85rem;">
@@ -110,7 +116,125 @@
         </div>
     </div>
 
+    <!-- Product backlog modal -->
+    <div class="modal fade" id="backlogModal" tabindex="-1" aria-labelledby="backlogModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="backlogModalLabel">
+                        <i class="bi bi-kanban me-2 text-primary"></i>Product backlog
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="backlogLoading" class="text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm me-2" role="status"></div>Backlog laden…
+                    </div>
+                    <div id="backlogError" class="alert alert-warning d-none">Kon de backlog niet laden. <a href="https://docs.google.com/spreadsheets/d/1Fcyz5ctBvsQy13nnhGf4PQirWIruSqsmPkrjZtFydco/edit?usp=sharing" target="_blank" rel="noopener">Open in Google Sheets</a>.</div>
+                    <div id="backlogTableWrap" class="table-responsive d-none"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="backlogHideLaunched">
+                        <i class="bi bi-eye-slash me-1"></i>Verberg Launched
+                    </button>
+                    <a href="https://docs.google.com/spreadsheets/d/1Fcyz5ctBvsQy13nnhGf4PQirWIruSqsmPkrjZtFydco/edit?usp=sharing" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm"><i class="bi bi-box-arrow-up-right me-1"></i>Open in Google Sheets</a>
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Sluiten</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function () {
+        const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/1Fcyz5ctBvsQy13nnhGf4PQirWIruSqsmPkrjZtFydco/export?format=csv';
+        let loaded = false;
+        let allRows = [];
+        let hideLaunched = false;
+
+        function parseCSV(text) {
+            const rows = [];
+            let inQuote = false, field = '', row = [];
+            for (let i = 0; i < text.length; i++) {
+                const ch = text[i];
+                if (ch === '"') {
+                    if (inQuote && text[i+1] === '"') { field += '"'; i++; }
+                    else { inQuote = !inQuote; }
+                } else if (ch === ',' && !inQuote) {
+                    row.push(field); field = '';
+                } else if ((ch === '\n' || ch === '\r') && !inQuote) {
+                    row.push(field); field = '';
+                    if (row.some(c => c.trim())) rows.push(row);
+                    row = [];
+                    if (ch === '\r' && text[i+1] === '\n') i++;
+                } else { field += ch; }
+            }
+            if (field || row.length) { row.push(field); if (row.some(c => c.trim())) rows.push(row); }
+            return rows;
+        }
+
+        function statusBadge(val) {
+            const v = val.trim();
+            if (v.toLowerCase() === 'launched')    return '<span class="badge fw-normal" style="background:#198754">' + v + '</span>';
+            if (v.toLowerCase() === 'in progress') return '<span class="badge fw-normal" style="background:#fd7e14">' + v + '</span>';
+            return val;
+        }
+
+        function renderTable(rows, hideL) {
+            if (!rows.length) return '<p class="text-muted">Geen data gevonden.</p>';
+            const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const headers = rows[0];
+            const notesIdx = headers.findIndex(h => h.trim().toLowerCase() === 'notes');
+            const statusIdx = headers.findIndex(h => h.trim().toLowerCase() === 'status');
+
+            const visibleCols = headers.map((_, i) => i).filter(i => i !== notesIdx);
+
+            const header = visibleCols.map(i => '<th class="text-nowrap">' + esc(headers[i]) + '</th>').join('');
+
+            const dataRows = rows.slice(1).filter(r => {
+                if (!hideL || statusIdx === -1) return true;
+                return (r[statusIdx] || '').trim().toLowerCase() !== 'launched';
+            });
+
+            const body = dataRows.map(r =>
+                '<tr>' + visibleCols.map(i => {
+                    const val = r[i] || '';
+                    const cell = i === statusIdx ? statusBadge(val) : esc(val);
+                    return '<td>' + cell + '</td>';
+                }).join('') + '</tr>'
+            ).join('');
+
+            return '<table class="table table-sm table-striped table-bordered table-hover align-middle small mb-0"><thead class="table-dark"><tr>' + header + '</tr></thead><tbody>' + body + '</tbody></table>';
+        }
+
+        document.getElementById('backlogModal').addEventListener('show.bs.modal', function () {
+            if (loaded) return;
+            fetch(SHEET_CSV)
+                .then(function (r) { if (!r.ok) throw new Error(r.status); return r.text(); })
+                .then(function (text) {
+                    allRows = parseCSV(text);
+                    document.getElementById('backlogTableWrap').innerHTML = renderTable(allRows, hideLaunched);
+                    document.getElementById('backlogLoading').classList.add('d-none');
+                    document.getElementById('backlogTableWrap').classList.remove('d-none');
+                    loaded = true;
+                })
+                .catch(function () {
+                    document.getElementById('backlogLoading').classList.add('d-none');
+                    document.getElementById('backlogError').classList.remove('d-none');
+                });
+        });
+
+        document.getElementById('backlogHideLaunched').addEventListener('click', function () {
+            hideLaunched = !hideLaunched;
+            this.innerHTML = hideLaunched
+                ? '<i class="bi bi-eye me-1"></i>Toon Launched'
+                : '<i class="bi bi-eye-slash me-1"></i>Verberg Launched';
+            if (loaded) {
+                document.getElementById('backlogTableWrap').innerHTML = renderTable(allRows, hideLaunched);
+            }
+        });
+    }());
+    </script>
     {% block page_scripts %}{% endblock %}
 </body>
 </html>
