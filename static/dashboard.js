@@ -244,13 +244,18 @@ function rebuildPlot(selectedSectors) {
         }
     });
 
+    const isMobile = window.innerWidth < 768;
     const layout = {
-        title: 'Ziekteverzuimpercentage per sector over tijd',
-        xaxis: { title: { text: 'Kwartaal', standoff: 20 }, tickangle: -45 },
-        yaxis: { title: { text: 'Ziekteverzuim %', standoff: 10 } },
-        legend: { title: { text: 'Sector' } },
+        title: isMobile ? 'Verzuim per sector' : 'Ziekteverzuimpercentage per sector over tijd',
+        xaxis: { title: isMobile ? '' : { text: 'Kwartaal', standoff: 20 }, tickangle: -45 },
+        yaxis: { title: { text: 'Verzuim %', standoff: 10 } },
+        legend: isMobile
+            ? { title: { text: 'Sector' }, orientation: 'h', x: 0, y: -0.45, xanchor: 'left', yanchor: 'top' }
+            : { title: { text: 'Sector' }, orientation: 'v', x: 1.02, y: 1, xanchor: 'left', yanchor: 'top' },
         hovermode: 'closest',
-        margin: { l: 70, r: 40, t: 70, b: 80 },
+        margin: isMobile
+            ? { l: 60, r: 10, t: 50, b: 260 }
+            : { l: 70, r: 40, t: 70, b: 80 },
         plot_bgcolor: 'rgba(0,0,0,0)',
         paper_bgcolor: 'rgba(0,0,0,0)'
     };

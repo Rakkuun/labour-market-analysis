@@ -293,6 +293,40 @@
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 <script>
+// ── Mobile legend fix for sector chart ────────────────────────────────────
+(function () {
+    let busy = false;
+    function fixLegend() {
+        if (busy) return;
+        const el = document.getElementById('plotly-chart');
+        if (!el || !el._fullLayout) return;
+        const isMobile = window.innerWidth < 768;
+        busy = true;
+        Plotly.relayout('plotly-chart', {
+            'legend.orientation': isMobile ? 'h'    : 'v',
+            'legend.x':          isMobile ? 0      : 1.02,
+            'legend.y':          isMobile ? -0.45  : 1,
+            'legend.xanchor':    isMobile ? 'left' : 'left',
+            'legend.yanchor':    isMobile ? 'top'  : 'top',
+            'margin.b':          isMobile ? 260    : 80,
+            'margin.r':          isMobile ? 10     : 40,
+            'margin.t':          isMobile ? 50     : 70,
+            'xaxis.title':       isMobile ? ''     : 'Kwartaal',
+        }).then(function () { busy = false; });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(fixLegend, 400);
+    });
+
+    let resizeTimer;
+    window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(fixLegend, 150);
+    });
+}());
+</script>
+<script>
 // ── Conversational analytics chat ─────────────────────────────────────────
 (function () {
     const chatHistory = [];  // [{role, content}]
