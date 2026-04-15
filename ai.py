@@ -265,6 +265,23 @@ _CHAT_TOOLS = [
             },
         },
     },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'rank_sectors',
+            'description': 'Rangschikt alle sectoren op gemiddeld ziekteverzuim (hoog naar laag of laag naar hoog), optioneel gefilterd op jaar. Gebruik dit voor vragen als "welke sector heeft het hoogste/laagste verzuim" of een overzicht van alle sectoren.',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'order': {'type': 'string', 'enum': ['hoog_naar_laag', 'laag_naar_hoog'], 'description': 'Sorteervolgorde'},
+                    'top_n': {'type': 'integer', 'description': 'Aantal sectoren teruggeven (standaard alle 39)'},
+                    'year_min': {'type': 'integer', 'description': 'Beginjaar (optioneel)'},
+                    'year_max': {'type': 'integer', 'description': 'Eindjaar (optioneel)'},
+                },
+                'required': [],
+            },
+        },
+    },
 ]
 
 
@@ -315,6 +332,29 @@ def _tool_get_forecast(pred_df, sector):
     }
 
 
+def _tool_rank_sectors(df, order='hoog_naar_laag', top_n=None, year_min=None, year_max=None):
+    s = df.copy()
+    if year_min is not None:
+        s = s[s['Year'] >= year_min]
+    if year_max is not None:
+        s = s[s['Year'] <= year_max]
+    ranking = (
+        s.groupby('Sector')['AbsenteeismPercentage']
+        .mean()
+        .round(2)
+        .reset_index()
+        .rename(columns={'AbsenteeismPercentage': 'gemiddelde_pct'})
+        .sort_values('gemiddelde_pct', ascending=(order == 'laag_naar_hoog'))
+    )
+    if top_n:
+        ranking = ranking.head(top_n)
+    return {
+        'volgorde': order,
+        'periode': f"{int(s['Year'].min())}–{int(s['Year'].max())}",
+        'sectoren': ranking.to_dict(orient='records'),
+    }
+
+
 def _execute_tool(name, args, df, pred_df):
     if name == 'list_sectors':
         return _tool_list_sectors(df)
@@ -324,6 +364,8 @@ def _execute_tool(name, args, df, pred_df):
         return _tool_compare_sectors(df, **args)
     if name == 'get_forecast':
         return _tool_get_forecast(pred_df, **args)
+    if name == 'rank_sectors':
+        return _tool_rank_sectors(df, **args)
     return {'fout': f'Onbekend tool: {name}'}
 
 
