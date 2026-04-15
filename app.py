@@ -6,7 +6,7 @@ specifically absenteeism rates across different sectors.
 """
 from flask import Flask, render_template, request, jsonify
 from db import load_data_from_db, build_sector_data
-from ai import analyze_with_ai, lookup_company_info
+from ai import analyze_with_ai, lookup_company_info, chat_with_agent
 from context import prepare_context
 from chart import create_hero_preview_figure
 
@@ -74,6 +74,24 @@ def api_lookup_company():
             return jsonify({'error': 'Geen bedrijfsnaam opgegeven'}), 400
         result = lookup_company_info(company_name)
         return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/api/chat', methods=['POST'])
+def api_chat():
+    """Conversational analytics: answer questions about absenteeism data using an AI agent."""
+    try:
+        data = request.json
+        message = (data.get('message') or '').strip()
+        if not message:
+            return jsonify({'error': 'Geen bericht opgegeven'}), 400
+        history = data.get('history') or []
+        active_sector = (data.get('active_sector') or '').strip() or None
+
+        df, pred_df = load_data_from_db()
+        reply = chat_with_agent(message, history, df, pred_df, active_sector)
+        return jsonify({'reply': reply})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

@@ -205,3 +205,185 @@ def lookup_company_info(company_name):
             data[field] = None
 
     return data
+
+
+# ── Conversational analytics agent ───────────────────────────────────────────
+
+_CHAT_TOOLS = [
+    {
+        'type': 'function',
+        'function': {
+            'name': 'list_sectors',
+            'description': 'Geeft een lijst van alle beschikbare sectoren in de dataset.',
+            'parameters': {'type': 'object', 'properties': {}, 'required': []},
+        },
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'get_sector_stats',
+            'description': 'Geeft statistieken over ziekteverzuim (gemiddelde, min, max, meest recente waarde) voor een sector, optioneel gefilterd op jaar.',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'sector': {'type': 'string', 'description': 'Exacte sectornaam zoals in de dataset'},
+                    'year_min': {'type': 'integer', 'description': 'Beginjaar (optioneel)'},
+                    'year_max': {'type': 'integer', 'description': 'Eindjaar (optioneel)'},
+                },
+                'required': ['sector'],
+            },
+        },
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'compare_sectors',
+            'description': 'Vergelijkt ziekteverzuimstatistieken tussen twee sectoren naast elkaar.',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'sector_a': {'type': 'string', 'description': 'Eerste sector'},
+                    'sector_b': {'type': 'string', 'description': 'Tweede sector'},
+                    'year_min': {'type': 'integer', 'description': 'Beginjaar (optioneel)'},
+                    'year_max': {'type': 'integer', 'description': 'Eindjaar (optioneel)'},
+                },
+                'required': ['sector_a', 'sector_b'],
+            },
+        },
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'get_forecast',
+            'description': 'Geeft de kwartaalprognoses voor de komende vier kwartalen voor een sector.',
+            'parameters': {
+                'type': 'object',
+                'properties': {
+                    'sector': {'type': 'string', 'description': 'Exacte sectornaam'},
+                },
+                'required': ['sector'],
+            },
+        },
+    },
+]
+
+
+def _tool_list_sectors(df):
+    sectors = sorted(df['Sector'].unique().tolist())
+    return {'sectoren': sectors, 'aantal': len(sectors)}
+
+
+def _tool_get_sector_stats(df, sector, year_min=None, year_max=None):
+    s = df[df['Sector'] == sector].copy()
+    if year_min is not None:
+        s = s[s['Year'] >= year_min]
+    if year_max is not None:
+        s = s[s['Year'] <= year_max]
+    if s.empty:
+        return {'fout': f'Geen data gevonden voor sector: {sector}'}
+    vals = s['AbsenteeismPercentage'].dropna()
+    recent = s.sort_values(['Year', 'Period']).iloc[-1]
+    return {
+        'sector': sector,
+        'periode': f"{int(s['Year'].min())}–{int(s['Year'].max())}",
+        'gemiddelde_pct': round(float(vals.mean()), 2),
+        'minimum_pct': round(float(vals.min()), 2),
+        'maximum_pct': round(float(vals.max()), 2),
+        'meest_recent_pct': round(float(recent['AbsenteeismPercentage']), 2),
+        'meest_recent_periode': f"{int(recent['Year'])} {recent['Period']}",
+        'n_kwartalen': int(len(vals)),
+    }
+
+
+def _tool_compare_sectors(df, sector_a, sector_b, year_min=None, year_max=None):
+    return {
+        sector_a: _tool_get_sector_stats(df, sector_a, year_min, year_max),
+        sector_b: _tool_get_sector_stats(df, sector_b, year_min, year_max),
+    }
+
+
+def _tool_get_forecast(pred_df, sector):
+    rows = pred_df[pred_df['Sector'] == sector].sort_values('Quarter')
+    if rows.empty:
+        return {'fout': f'Geen prognose gevonden voor sector: {sector}'}
+    return {
+        'sector': sector,
+        'prognoses': [
+            {'kwartaal': row['Quarter'], 'verzuim_pct': round(float(row['Predicted_Absenteeism']), 2)}
+            for _, row in rows.iterrows()
+        ],
+    }
+
+
+def _execute_tool(name, args, df, pred_df):
+    if name == 'list_sectors':
+        return _tool_list_sectors(df)
+    if name == 'get_sector_stats':
+        return _tool_get_sector_stats(df, **args)
+    if name == 'compare_sectors':
+        return _tool_compare_sectors(df, **args)
+    if name == 'get_forecast':
+        return _tool_get_forecast(pred_df, **args)
+    return {'fout': f'Onbekend tool: {name}'}
+
+
+def chat_with_agent(message, history, df, pred_df, active_sector=None):
+    """Conversational agent that answers questions about absenteeism data using tools.
+
+    Args:
+        message: the user's latest message
+        history: list of {role, content} dicts (prior turns)
+        df: cleaned_absenteeism DataFrame
+        pred_df: predictions DataFrame
+        active_sector: sector currently selected in the dashboard (optional)
+
+    Returns:
+        str: the agent's reply in Dutch
+    """
+    system = (
+        'Je bent een arbeidsmarktanalist die helpt bij het interpreteren van Nederlandse '
+        'CBS-ziekteverzuimdata (1996–2025, 39 sectoren) en kwartaalprognoses. '
+        'Gebruik de beschikbare tools om vragen te beantwoorden met echte data. '
+        'Antwoord altijd in het Nederlands. Wees beknopt maar informatief (2–4 zinnen). '
+        'Noem concrete percentages uit de data wanneer dat relevant is.'
+    )
+    if active_sector:
+        system += f" De gebruiker heeft momenteel sector '{active_sector}' geselecteerd."
+
+    messages = [{'role': 'system', 'content': system}]
+    for h in (history or [])[-8:]:
+        if h.get('role') in ('user', 'assistant') and h.get('content'):
+            messages.append({'role': h['role'], 'content': h['content']})
+    messages.append({'role': 'user', 'content': message})
+
+    client = _get_client()
+    for _ in range(5):
+        response = client.chat.completions.create(
+            model=_DEEPSEEK_MODEL,
+            messages=messages,
+            tools=_CHAT_TOOLS,
+            tool_choice='auto',
+            max_tokens=600,
+            temperature=0.5,
+        )
+        msg = response.choices[0].message
+        # Append as dict so it serialises cleanly for subsequent rounds
+        messages.append(msg)
+
+        if not msg.tool_calls:
+            return (msg.content or '').strip()
+
+        for tc in msg.tool_calls:
+            result = _execute_tool(
+                tc.function.name,
+                json.loads(tc.function.arguments),
+                df,
+                pred_df,
+            )
+            messages.append({
+                'role': 'tool',
+                'tool_call_id': tc.id,
+                'content': json.dumps(result, ensure_ascii=False),
+            })
+
+    return 'Sorry, ik kon deze vraag niet volledig beantwoorden. Probeer het opnieuw.'

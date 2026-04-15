@@ -137,6 +137,50 @@
         </div>
     </div>
 
+    <!-- Conversational analytics -->
+    <div class="row mt-4 mb-2">
+        <div class="col-12">
+            <div class="chat-panel p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-dots text-primary me-2"></i>Stel een vraag over de data
+                    </h5>
+                    <button class="btn btn-sm btn-outline-secondary" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#chatBody" aria-expanded="true">
+                        <i class="bi bi-chevron-up" id="chatChevron"></i>
+                    </button>
+                </div>
+                <div class="collapse show" id="chatBody">
+                    <!-- Starters -->
+                    <div id="chatStarters" class="mb-3 d-flex flex-wrap gap-2">
+                        <button class="btn btn-sm btn-outline-primary chat-starter"
+                                onclick="sendStarter(this)">Wat is het gemiddelde verzuim in de bouw?</button>
+                        <button class="btn btn-sm btn-outline-primary chat-starter"
+                                onclick="sendStarter(this)">Vergelijk horeca met de zorg.</button>
+                        <button class="btn btn-sm btn-outline-primary chat-starter"
+                                onclick="sendStarter(this)">Wat verwacht je voor de komende kwartalen in de handel?</button>
+                        <button class="btn btn-sm btn-outline-primary chat-starter"
+                                onclick="sendStarter(this)">Welke sector heeft het hoogste verzuim?</button>
+                    </div>
+                    <!-- Message history -->
+                    <div id="chatMessages" class="chat-messages mb-3"></div>
+                    <!-- Input -->
+                    <div class="d-flex gap-2">
+                        <input type="text" id="chatInput" class="form-control"
+                               placeholder="Stel een vraag over ziekteverzuim..."
+                               onkeydown="if(event.key==='Enter')sendChat()">
+                        <button class="btn btn-primary" id="chatSendBtn" onclick="sendChat()">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                    <p class="text-muted mt-2 mb-0" style="font-size:.72rem;">
+                        <i class="bi bi-info-circle me-1"></i>De agent heeft toegang tot CBS-data 1996–2025 en kwartaalprognoses. Antwoorden worden gegenereerd door DeepSeek AI.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Over ziekteverzuim -->
     <div class="row mt-5">
         <div class="col-12">
@@ -173,4 +217,94 @@
 </script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+<script>
+// ── Conversational analytics chat ─────────────────────────────────────────
+(function () {
+    const chatHistory = [];  // [{role, content}]
+
+    function getActiveSector() {
+        // Read from the sector filter — take first selected option
+        const sel = document.getElementById('sectorFilter');
+        if (!sel) return '';
+        const selected = Array.from(sel.selectedOptions).map(o => o.value);
+        return selected.length === 1 ? selected[0] : '';
+    }
+
+    function appendMessage(role, text) {
+        const box = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = role === 'user' ? 'chat-msg chat-msg--user' : 'chat-msg chat-msg--agent';
+        div.textContent = text;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+    }
+
+    function setLoading(on) {
+        const btn = document.getElementById('chatSendBtn');
+        const input = document.getElementById('chatInput');
+        btn.disabled = on;
+        input.disabled = on;
+        if (on) {
+            const box = document.getElementById('chatMessages');
+            const typing = document.createElement('div');
+            typing.className = 'chat-msg chat-msg--agent chat-msg--typing';
+            typing.id = 'chatTyping';
+            typing.innerHTML = '<span></span><span></span><span></span>';
+            box.appendChild(typing);
+            box.scrollTop = box.scrollHeight;
+        } else {
+            const typing = document.getElementById('chatTyping');
+            if (typing) typing.remove();
+        }
+    }
+
+    window.sendChat = function () {
+        const input = document.getElementById('chatInput');
+        const message = input.value.trim();
+        if (!message) return;
+
+        // Hide starters after first message
+        document.getElementById('chatStarters').style.display = 'none';
+
+        input.value = '';
+        appendMessage('user', message);
+        chatHistory.push({ role: 'user', content: message });
+        setLoading(true);
+
+        fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                message,
+                history: chatHistory.slice(0, -1),  // history without latest user msg
+                active_sector: getActiveSector(),
+            }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            setLoading(false);
+            const reply = data.reply || data.error || 'Er ging iets mis.';
+            appendMessage('agent', reply);
+            chatHistory.push({ role: 'assistant', content: reply });
+        })
+        .catch(() => {
+            setLoading(false);
+            appendMessage('agent', 'Verbindingsfout. Controleer of de server draait.');
+        });
+    };
+
+    window.sendStarter = function (btn) {
+        document.getElementById('chatInput').value = btn.textContent;
+        sendChat();
+    };
+
+    // Chevron toggle
+    document.getElementById('chatBody').addEventListener('hidden.bs.collapse', () => {
+        document.getElementById('chatChevron').className = 'bi bi-chevron-down';
+    });
+    document.getElementById('chatBody').addEventListener('shown.bs.collapse', () => {
+        document.getElementById('chatChevron').className = 'bi bi-chevron-up';
+    });
+}());
+</script>
 {% endblock %}
