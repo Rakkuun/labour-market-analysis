@@ -254,9 +254,9 @@ def create_flu_comparison_figure(df, flu_records, last_n_years=5):
             showgrid=False,
             zeroline=False,
         ),
-        legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
+        legend=dict(orientation='h', yanchor='top', y=-0.35, xanchor='center', x=0.5),
         hovermode='x unified',
-        margin=dict(l=70, r=80, t=80, b=80),
+        margin=dict(l=70, r=80, t=50, b=120),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
     )

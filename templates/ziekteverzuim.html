@@ -182,26 +182,101 @@
     </div>
 
     <!-- Over ziekteverzuim -->
-    <div class="row mt-5">
-        <div class="col-12">
-            <div class="p-4 rounded shadow-sm bg-white" style="border-left: 4px solid #0d6efd;">
-                <h4 class="mb-1"><i class="bi bi-bar-chart-line"></i> Over ziekteverzuim</h4>
-                <p class="text-muted small mb-3">Ziekteverzuim in Nederland kent een duidelijk seizoenspatroon. Het piekseizoen valt in Q1 (winter/griepseizoen) en Q4 (herfst), terwijl Q3 (zomer) traditioneel het laagste verzuim laat zien. Onderstaande grafiek toont het gemiddelde verzuim per kwartaal over de afgelopen vijf jaar.</p>
-                {{ seasonal_chart_html|safe }}
-            </div>
-        </div>
-    </div>
+    <section class="mt-5 mb-5">
+        <h3 class="fw-bold mb-1" style="color:#212529;">
+            <i class="bi bi-bar-chart-line text-primary me-2"></i>Over ziekteverzuim
+        </h3>
+        <p class="text-muted small mb-4">Feiten, cijfers en inzichten op basis van CBS-data {{ insights.data_from }}–{{ insights.data_to }} ({{ insights.n_sectors }} sectoren).</p>
 
-    <!-- Ziekteverzuim vs. griepactiviteit -->
-    <div class="row mt-4 mb-5">
-        <div class="col-12">
-            <div class="p-4 rounded shadow-sm bg-white" style="border-left: 4px solid #f03e3e;">
-                <h4 class="mb-1"><i class="bi bi-virus"></i> Ziekteverzuim vs. griepactiviteit</h4>
-                <p class="text-muted small mb-3">Vergelijking van het gemiddeld landelijk ziekteverzuim (CBS, alle sectoren) met het aantal positieve grieptests per kwartaal in Nederland (WHO FluNet, 1996–2025). De gestippelde lijn toont griepactiviteit op de rechter as.</p>
-                {{ flu_chart_html|safe }}
+        <!-- Insight cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="insight-card">
+                    <div class="insight-icon"><i class="bi bi-percent"></i></div>
+                    <div class="insight-value">{{ insights.nat_avg }}%</div>
+                    <div class="insight-label">Nationaal gemiddelde</div>
+                    <div class="insight-sub">alle sectoren, alle jaren</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="insight-card">
+                    <div class="insight-icon"><i class="bi bi-thermometer-high"></i></div>
+                    <div class="insight-value">{{ insights.peak_q }}</div>
+                    <div class="insight-label">Piekseizoen</div>
+                    <div class="insight-sub">kwartaal met hoogste verzuim</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="insight-card insight-card--high">
+                    <div class="insight-icon"><i class="bi bi-arrow-up-circle"></i></div>
+                    <div class="insight-value">{{ insights.highest_sector_val }}%</div>
+                    <div class="insight-label">Hoogste sector</div>
+                    <div class="insight-sub">{{ insights.highest_sector }}</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="insight-card insight-card--low">
+                    <div class="insight-icon"><i class="bi bi-arrow-down-circle"></i></div>
+                    <div class="insight-value">{{ insights.lowest_sector_val }}%</div>
+                    <div class="insight-label">Laagste sector</div>
+                    <div class="insight-sub">{{ insights.lowest_sector }}</div>
+                </div>
             </div>
         </div>
-    </div>
+
+        <!-- Trend + seizoen kaart -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="insight-card insight-card--trend h-100">
+                    <div class="insight-icon">
+                        <i class="bi bi-{% if insights.trend_up %}graph-up-arrow text-danger{% else %}graph-down-arrow text-success{% endif %}"></i>
+                    </div>
+                    <div class="insight-value">
+                        {% if insights.trend_up %}+{% else %}-{% endif %}{{ insights.trend_diff }}%
+                    </div>
+                    <div class="insight-label">Trend afgelopen 2 jaar</div>
+                    <div class="insight-sub">
+                        t.o.v. de 2 jaar daarvoor —
+                        {% if insights.trend_up %}verzuim neemt toe{% else %}verzuim neemt af{% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card h-100">
+                    <div class="insight-icon"><i class="bi bi-sun"></i></div>
+                    <div class="insight-value">{{ insights.low_q }}</div>
+                    <div class="insight-label">Laagste seizoen</div>
+                    <div class="insight-sub">kwartaal met minste verzuim</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="insight-card h-100">
+                    <div class="insight-icon"><i class="bi bi-calendar3"></i></div>
+                    <div class="insight-value">{{ insights.data_to - insights.data_from + 1 }} jaar</div>
+                    <div class="insight-label">Databereik</div>
+                    <div class="insight-sub">{{ insights.data_from }} t/m {{ insights.data_to }}, {{ insights.n_sectors }} sectoren</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="insight-chart-card p-4">
+                    <h6 class="fw-semibold mb-1"><i class="bi bi-calendar4-week me-2 text-primary"></i>Seizoenspatroon</h6>
+                    <p class="text-muted small mb-3">Gemiddeld verzuim per kwartaal over de afgelopen 5 jaar.</p>
+                    {{ seasonal_chart_html|safe }}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="insight-chart-card p-4">
+                    <h6 class="fw-semibold mb-1"><i class="bi bi-virus me-2" style="color:#f03e3e;"></i>Verzuim vs. griepactiviteit</h6>
+                    <p class="text-muted small mb-3">CBS-verzuim vs. positieve grieptests per kwartaal (WHO FluNet, 1996–2025).</p>
+                    {{ flu_chart_html|safe }}
+                </div>
+            </div>
+        </div>
+    </section>
 
 </div>
 {% endblock %}
