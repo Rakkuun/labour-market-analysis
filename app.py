@@ -4,6 +4,7 @@ Labour Market Analysis Flask Application
 A web application for analyzing Dutch labour market data,
 specifically absenteeism rates across different sectors.
 """
+import logging
 import os
 from functools import wraps
 
@@ -17,6 +18,12 @@ from ai import analyze_with_ai, lookup_company_info, chat_with_agent
 from context import prepare_context
 from chart import create_hero_preview_figure
 from refresh import run_refresh
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+)
 
 app = Flask(__name__)
 
@@ -168,6 +175,20 @@ def admin_refresh():
         return jsonify({'error': 'Ongeldige bron. Gebruik "cbs" of "flu".'}), 400
     result = run_refresh(source)
     return jsonify(result)
+
+
+# ── Health check ─────────────────────────────────────────────────────────────
+@app.route('/health')
+def health():
+    """Health check for Railway / uptime monitors."""
+    return jsonify({'status': 'ok'})
+
+
+# ── Health check ─────────────────────────────────────────────────────────────
+@app.route('/health')
+def health():
+    """Health check for Railway / uptime monitors."""
+    return jsonify({'status': 'ok'})
 
 
 if __name__ == '__main__':

@@ -1,13 +1,14 @@
 import logging
 import pandas as pd
 import sqlite3
+
+logger = logging.getLogger(__name__)
+
 try:
     import cbsodata
 except ImportError:
-    print("cbsodata not installed. Install with: pip install cbsodata")
+    logger.warning('cbsodata not installed. Install with: pip install cbsodata')
     cbsodata = None
-
-logger = logging.getLogger(__name__)
 
 # Helper functions for date conversion
 quarters_map = {

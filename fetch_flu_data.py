@@ -13,6 +13,9 @@ import urllib.request
 import csv
 import io
 import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 FLUNET_URL = (
@@ -34,12 +37,12 @@ def _iso_week_to_quarter(year: int, week: int) -> int:
 
 
 def fetch_and_store():
-    print('Downloading WHO FluNet data for Netherlands…')
+    logger.info('Downloading WHO FluNet data for Netherlands…')
     with urllib.request.urlopen(FLUNET_URL, timeout=30) as response:
         content = response.read().decode('utf-8')
 
     rows = list(csv.DictReader(content.splitlines()))
-    print(f'  Total rows: {len(rows)}')
+    logger.info('  Total rows: %d', len(rows))
 
     # Aggregate: sum INF_ALL per (year, quarter)
     quarterly: dict[tuple[int, int], dict] = {}
@@ -73,8 +76,8 @@ def fetch_and_store():
         quarterly[key]['flu_positives'] += flu_val
         quarterly[key]['weeks'] += 1
 
-    print(f'  Skipped rows (no data): {skipped}')
-    print(f'  Quarterly buckets: {len(quarterly)}')
+    logger.info('  Skipped rows (no data): %d', skipped)
+    logger.info('  Quarterly buckets: %d', len(quarterly))
 
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
@@ -100,7 +103,7 @@ def fetch_and_store():
 
     conn.commit()
     conn.close()
-    print(f'Stored {len(quarterly)} quarterly flu records in data.db (table: flu_quarterly)')
+    logger.info('Stored %d quarterly flu records in data.db (table: flu_quarterly)', len(quarterly))
 
 
 if __name__ == '__main__':
