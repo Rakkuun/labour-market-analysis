@@ -1,19 +1,13 @@
+import logging
+
+import numpy as np
 import pandas as pd
 import sqlite3
-import re
-import numpy as np
 from sklearn.linear_model import LinearRegression
 
+from db import extract_quarter_number
 
-def period_to_quarter(period_str):
-    period = str(period_str).strip()
-    kw_match = re.search(r'KW0*([1-4])', period, re.IGNORECASE)
-    if kw_match:
-        return int(kw_match.group(1))
-    norm_match = re.search(r'([1-4])e kwartaal', period, re.IGNORECASE)
-    if norm_match:
-        return int(norm_match.group(1))
-    return None
+logger = logging.getLogger(__name__)
 
 
 def analyze_trends():
@@ -22,10 +16,10 @@ def analyze_trends():
     conn.close()
 
     if df.empty:
-        print("No data to analyze")
+        logger.info('No data to analyze')
         return
 
-    df['QuarterNum'] = df['Period'].apply(period_to_quarter)
+    df['QuarterNum'] = pd.to_numeric(df['Period'].apply(extract_quarter_number), errors='coerce')
     df = df.dropna(subset=['QuarterNum'])
     df['QuarterNum'] = df['QuarterNum'].astype(int)
     df['TimeIndex'] = df['Year'] + (df['QuarterNum'] - 1) * 0.25
@@ -35,7 +29,7 @@ def analyze_trends():
     sectors = grouped['Sector'].unique()
     predictions = []
 
-    print(f"Analyzing trends for {len(sectors)} sectors...")
+    logger.info('Analyzing trends for %d sectors...', len(sectors))
 
     for sector in sectors:
         sector_data = grouped[grouped['Sector'] == sector].sort_values('TimeIndex')
@@ -102,9 +96,9 @@ def analyze_trends():
         conn = sqlite3.connect('data.db')
         pred_df.to_sql('predictions', conn, if_exists='replace', index=False)
         conn.close()
-        print(f"AI analysis completed. {len(predictions)} quarterly predictions saved for {len(sectors)} sectors.")
+        logger.info('AI analysis completed. %d quarterly predictions saved for %d sectors.', len(predictions), len(sectors))
     else:
-        print("No predictions generated.")
+        logger.info('No predictions generated.')
 
 
 if __name__ == "__main__":
