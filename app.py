@@ -189,12 +189,5 @@ def health():
     return jsonify({'status': 'ok'})
 
 
-# ── Health check ─────────────────────────────────────────────────────────────
-@app.route('/health')
-def health():
-    """Health check for Railway / uptime monitors."""
-    return jsonify({'status': 'ok'})
-
-
 if __name__ == '__main__':
     app.run(debug=os.getenv('FLASK_DEBUG', 'false').lower() == 'true')
