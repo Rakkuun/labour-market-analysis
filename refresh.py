@@ -4,7 +4,6 @@ Called by the admin panel (manual) and the nightly APScheduler job.
 Every run is logged to refresh_log in data.db.
 """
 import sqlite3
-import traceback
 
 from db import DB_PATH, log_refresh_start, log_refresh_finish
 
@@ -24,10 +23,17 @@ def run_refresh(source: str) -> dict:
             raise ValueError(f"Onbekende databron: {source!r}")
 
         log_refresh_finish(row_id, status='ok', rows_updated=rows)
+
+        # Invalidate the cached dashboard page so the next request gets fresh charts
+        try:
+            from app import cache
+            cache.delete('ziekteverzuim_context')
+        except Exception:
+            pass
+
         return {'status': 'ok', 'rows_updated': rows, 'error_msg': None}
 
     except Exception as exc:
-        msg = traceback.format_exc()
         log_refresh_finish(row_id, status='error', error_msg=str(exc))
         return {'status': 'error', 'rows_updated': None, 'error_msg': str(exc)}
 

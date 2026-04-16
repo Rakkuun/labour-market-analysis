@@ -6,6 +6,7 @@ from functools import wraps
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, Response, jsonify, render_template, request
+from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
@@ -26,6 +27,11 @@ logger = logging.getLogger(__name__)
 
 # ── App ───────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
+
+cache = Cache(app, config={
+    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_DEFAULT_TIMEOUT': 3600,   # 1 hour; invalidated earlier on refresh
+})
 
 limiter = Limiter(
     get_remote_address,
@@ -78,6 +84,7 @@ def tools():
 
 
 @app.route('/tools/ziekteverzuim')
+@cache.cached(key_prefix='ziekteverzuim_context')
 def ziekteverzuim():
     df, pred_df = load_data_from_db()
     context = prepare_context(df, pred_df)
