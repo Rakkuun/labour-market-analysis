@@ -8,6 +8,8 @@ import os
 from functools import wraps
 
 from flask import Flask, render_template, request, jsonify, Response
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from db import load_data_from_db, build_sector_data, init_admin_tables, get_refresh_log, get_api_usage_stats
@@ -17,6 +19,14 @@ from chart import create_hero_preview_figure
 from refresh import run_refresh
 
 app = Flask(__name__)
+
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],          # No global limit; set per-route below
+    storage_uri='memory://',
+)
 
 # Initialise admin log tables on startup
 init_admin_tables()
@@ -73,10 +83,11 @@ def ziekteverzuim():
 
 
 @app.route('/api/analyze', methods=['POST'])
+@limiter.limit('20 per minute; 100 per hour')
 def api_analyze():
     """Generate AI analysis for selected sectors and year range."""
     try:
-        data = request.json
+        data = request.json or {}
         selected_sectors = data.get('sectors', [])
         year_min = data.get('year_min', 2021)
         year_max = data.get('year_max', 2025)
@@ -84,7 +95,11 @@ def api_analyze():
 
         # Load and prepare data
         df, _ = load_data_from_db()
-        sector_data, _ = build_sector_data(df)
+        sector_data, valid_sectors = build_sector_data(df)
+
+        # Validate sector input against known sectors
+        valid_set = set(valid_sectors)
+        selected_sectors = [s for s in selected_sectors if isinstance(s, str) and s in valid_set]
 
         # Get AI analysis
         analysis, forecast = analyze_with_ai(sector_data, selected_sectors, year_min, year_max, pred_dict)
@@ -96,6 +111,7 @@ def api_analyze():
 
 
 @app.route('/api/lookup-company', methods=['POST'])
+@limiter.limit('10 per minute; 50 per hour')
 def api_lookup_company():
     """Look up CBS classification for a given company name using AI."""
     try:
@@ -110,6 +126,7 @@ def api_lookup_company():
 
 
 @app.route('/api/chat', methods=['POST'])
+@limiter.limit('30 per minute; 200 per hour')
 def api_chat():
     """Conversational analytics: answer questions about absenteeism data using an AI agent."""
     try:
