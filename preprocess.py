@@ -2,6 +2,8 @@ import logging
 import pandas as pd
 import sqlite3
 
+from db import DB_PATH
+
 logger = logging.getLogger(__name__)
 
 # Actual column names returned by the CBS OData API (table 80072ned)
@@ -11,7 +13,7 @@ _CBS_PERIOD_COL = 'Perioden'
 
 
 def preprocess_data():
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql('SELECT * FROM absenteeism', conn)
     conn.close()
 
@@ -45,7 +47,7 @@ def preprocess_data():
         len(df), df['Sector'].nunique(), df['Year'].min(), df['Year'].max()
     )
 
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     df.to_sql('cleaned_absenteeism', conn, if_exists='replace', index=False)
     conn.close()
     logger.info('cleaned_absenteeism opgeslagen.')

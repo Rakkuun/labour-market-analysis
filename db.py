@@ -1,16 +1,20 @@
 """Database access: loading and querying the SQLite data store."""
+import os
 import re
 import sqlite3
 from datetime import datetime, timezone
 
 import pandas as pd
 
+# ── Database path ─────────────────────────────────────────────────────────────
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data.db')
+
 
 # ── Admin tables ──────────────────────────────────────────────────────────────
 
 def init_admin_tables():
     """Create admin log tables if they don't exist yet."""
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.execute('''
         CREATE TABLE IF NOT EXISTS refresh_log (
             id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,7 +43,7 @@ def init_admin_tables():
 
 def log_refresh_start(source: str) -> int:
     """Insert a 'running' row into refresh_log; returns the new row id."""
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     cur = conn.execute(
         "INSERT INTO refresh_log (source, started_at, status) VALUES (?, ?, 'running')",
         (source, _now()),
@@ -52,7 +56,7 @@ def log_refresh_start(source: str) -> int:
 
 def log_refresh_finish(row_id: int, status: str, rows_updated: int = None, error_msg: str = None):
     """Update an existing refresh_log row with the outcome."""
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.execute(
         'UPDATE refresh_log SET finished_at=?, status=?, rows_updated=?, error_msg=? WHERE id=?',
         (_now(), status, rows_updated, error_msg, row_id),
@@ -63,7 +67,7 @@ def log_refresh_finish(row_id: int, status: str, rows_updated: int = None, error
 
 def log_api_usage(endpoint: str, model: str, tokens_in: int, tokens_out: int, duration_ms: int):
     """Append a row to api_usage_log."""
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     conn.execute(
         'INSERT INTO api_usage_log (timestamp, endpoint, model, tokens_in, tokens_out, duration_ms) VALUES (?,?,?,?,?,?)',
         (_now(), endpoint, model, tokens_in, tokens_out, duration_ms),
@@ -74,7 +78,7 @@ def log_api_usage(endpoint: str, model: str, tokens_in: int, tokens_out: int, du
 
 def get_refresh_log(limit: int = 30) -> list[dict]:
     """Return the last N refresh log entries, newest first."""
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     try:
         df = pd.read_sql(
             f'SELECT * FROM refresh_log ORDER BY id DESC LIMIT {int(limit)}', conn
@@ -88,7 +92,7 @@ def get_refresh_log(limit: int = 30) -> list[dict]:
 
 def get_api_usage_stats() -> dict:
     """Return aggregated API usage: per-day totals and an overall summary."""
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     try:
         df = pd.read_sql('SELECT * FROM api_usage_log', conn)
     except Exception:
@@ -126,7 +130,7 @@ def load_data_from_db():
     Returns:
         tuple[pd.DataFrame, pd.DataFrame]: (absenteeism_df, predictions_df)
     """
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql('SELECT * FROM cleaned_absenteeism', conn)
     pred_df = pd.read_sql('SELECT * FROM predictions', conn)
     conn.close()
@@ -199,7 +203,7 @@ def load_flu_data():
         list[dict]: each dict has keys 'period', 'year', 'quarter', 'flu_positives'
         Returns empty list if table does not exist.
     """
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     try:
         df = pd.read_sql(
             'SELECT year, quarter, period, flu_positives FROM flu_quarterly ORDER BY year, quarter',

@@ -4,6 +4,7 @@ Labour Market Analysis Flask Application
 A web application for analyzing Dutch labour market data,
 specifically absenteeism rates across different sectors.
 """
+import hmac
 import logging
 import os
 from functools import wraps
@@ -24,6 +25,7 @@ logging.basicConfig(
     format='%(asctime)s %(levelname)s %(name)s: %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
 )
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
@@ -52,7 +54,7 @@ def _require_admin(f):
     def decorated(*args, **kwargs):
         password = os.getenv('ADMIN_PASSWORD', '').strip()
         auth = request.authorization
-        if not password or not auth or auth.password != password:
+        if not password or not auth or not hmac.compare_digest(auth.password, password):
             return Response(
                 'Toegang geweigerd', 401,
                 {'WWW-Authenticate': 'Basic realm="Admin"'}
@@ -113,8 +115,9 @@ def api_analyze():
 
         return jsonify({'analysis': analysis, 'forecast': forecast})
 
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    except Exception:
+        logger.exception('Fout in /api/analyze')
+        return jsonify({'error': 'Er is een interne fout opgetreden.'}), 500
 
 
 @app.route('/api/lookup-company', methods=['POST'])
@@ -128,8 +131,9 @@ def api_lookup_company():
             return jsonify({'error': 'Geen bedrijfsnaam opgegeven'}), 400
         result = lookup_company_info(company_name)
         return jsonify(result)
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    except Exception:
+        logger.exception('Fout in /api/lookup-company')
+        return jsonify({'error': 'Er is een interne fout opgetreden.'}), 500
 
 
 @app.route('/api/chat', methods=['POST'])
@@ -147,8 +151,9 @@ def api_chat():
         df, pred_df = load_data_from_db()
         reply = chat_with_agent(message, history, df, pred_df, active_sector)
         return jsonify({'reply': reply})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    except Exception:
+        logger.exception('Fout in /api/chat')
+        return jsonify({'error': 'Er is een interne fout opgetreden.'}), 500
 
 
 # ── Admin ─────────────────────────────────────────────────────────────────────

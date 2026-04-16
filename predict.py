@@ -5,13 +5,13 @@ import pandas as pd
 import sqlite3
 from sklearn.linear_model import LinearRegression
 
-from db import extract_quarter_number
+from db import DB_PATH, extract_quarter_number
 
 logger = logging.getLogger(__name__)
 
 
 def analyze_trends():
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql('SELECT * FROM cleaned_absenteeism', conn)
     conn.close()
 
@@ -93,7 +93,7 @@ def analyze_trends():
 
     if predictions:
         pred_df = pd.DataFrame(predictions)
-        conn = sqlite3.connect('data.db')
+        conn = sqlite3.connect(DB_PATH)
         pred_df.to_sql('predictions', conn, if_exists='replace', index=False)
         conn.close()
         logger.info('AI analysis completed. %d quarterly predictions saved for %d sectors.', len(predictions), len(sectors))

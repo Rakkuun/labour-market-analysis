@@ -2,6 +2,8 @@ import logging
 import pandas as pd
 import sqlite3
 
+from db import DB_PATH
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -65,7 +67,7 @@ _FALLBACK_DATA = {
 
 def _save_fallback():
     df = pd.DataFrame(_FALLBACK_DATA)
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     df.to_sql('absenteeism', conn, if_exists='replace', index=False)
     conn.close()
     logger.warning('Fallback dummy-data opgeslagen in database.')
@@ -89,7 +91,7 @@ def fetch_absenteeism_data():
             lambda x: convert_cbs_quarter_to_date(x) if 'kwartaal' in str(x) else convert_cbs_month_to_date(x)
         )
 
-        conn = sqlite3.connect('data.db')
+        conn = sqlite3.connect(DB_PATH)
         df.to_sql('absenteeism', conn, if_exists='replace', index=False)
         conn.close()
         logger.info('CBS-data opgeslagen in database.')

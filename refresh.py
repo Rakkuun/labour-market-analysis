@@ -6,7 +6,7 @@ Every run is logged to refresh_log in data.db.
 import sqlite3
 import traceback
 
-from db import log_refresh_start, log_refresh_finish
+from db import DB_PATH, log_refresh_start, log_refresh_finish
 
 
 def run_refresh(source: str) -> dict:
@@ -52,7 +52,7 @@ def _refresh_cbs() -> int:
     analyze_trends()
 
     # Return row count of cleaned table
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     cur = conn.execute('SELECT COUNT(*) FROM cleaned_absenteeism')
     count = cur.fetchone()[0]
     conn.close()
@@ -69,7 +69,7 @@ def _refresh_flu() -> int:
     from fetch_flu_data import fetch_and_store
     fetch_and_store()
 
-    conn = sqlite3.connect('data.db')
+    conn = sqlite3.connect(DB_PATH)
     cur = conn.execute('SELECT COUNT(*) FROM flu_quarterly')
     count = cur.fetchone()[0]
     conn.close()
