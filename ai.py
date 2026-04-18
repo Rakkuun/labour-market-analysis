@@ -101,7 +101,7 @@ Eerste sectie: 2-3 zinnen historische trendanalyse van de data.
 ###
 Tweede sectie: 2-3 zinnen over de verwachting voor de komende 4 kwartalen op basis van de prognosedata, inclusief seizoenspatroon en trendrichting als onderbouwing.
 
-Begin elke sectie direct met de inhoud, zonder labels of koppen. Schrijf in professioneel Nederlands. Wees beknopt en specifiek."""
+Begin elke sectie direct met de inhoud, zonder labels, koppen, HTML of Markdown. Gebruik uitsluitend platte tekst. Schrijf in professioneel Nederlands. Wees beknopt en specifiek."""
 
     try:
         t0 = time.monotonic()
@@ -112,8 +112,11 @@ Begin elke sectie direct met de inhoud, zonder labels of koppen. Schrijf in prof
             temperature=0.7,
         )
         _log('analyze', response, int((time.monotonic() - t0) * 1000))
+        import re as _re
+        def _strip_html(text):
+            return _re.sub(r'<[^>]+>', '', text).strip()
         parts = response.choices[0].message.content.split('###', 1)
-        return parts[0].strip(), parts[1].strip() if len(parts) > 1 else ''
+        return _strip_html(parts[0]), _strip_html(parts[1]) if len(parts) > 1 else ''
     except Exception as e:
         return f'Fout bij AI-analyse: {e}', ''
 

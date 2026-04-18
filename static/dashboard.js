@@ -68,8 +68,6 @@ function showCompanyResult(data) {
 
 function applyCompanyFilter(data) {
     if (!allSectors.length) return;
-    const select = document.getElementById('sectorFilter');
-    if (!select) return;
 
     // Lowest level first: bedrijfsklasse > bedrijfstak > bedrijfssector
     const levels = [
@@ -88,7 +86,13 @@ function applyCompanyFilter(data) {
         return;
     }
 
-    Array.from(select.options).forEach(opt => { opt.selected = opt.value === match.value; });
+    const checkboxes = document.querySelectorAll('.sector-checkbox');
+    if (checkboxes.length > 0) {
+        checkboxes.forEach(cb => { cb.checked = cb.value === match.value; });
+    } else {
+        const sel = document.getElementById('sectorFilter');
+        if (sel) Array.from(sel.options).forEach(opt => { opt.selected = opt.value === match.value; });
+    }
     if (info) {
         info.innerHTML = '<i class="bi bi-funnel-fill"></i> Grafiek gefilterd op <strong>' + match.label + '</strong>: <em>' + match.value + '</em>';
         info.style.display = 'block';
@@ -105,8 +109,13 @@ function clearCompany() {
     document.getElementById('clearCompanyBtn').style.display = 'none';
     const info = document.getElementById('companyFilterInfo');
     if (info) info.style.display = 'none';
-    const select = document.getElementById('sectorFilter');
-    if (select) Array.from(select.options).forEach(opt => { opt.selected = true; });
+    const checkboxes = document.querySelectorAll('.sector-checkbox');
+    if (checkboxes.length > 0) {
+        checkboxes.forEach(cb => { cb.checked = true; });
+    } else {
+        const sel = document.getElementById('sectorFilter');
+        if (sel) Array.from(sel.options).forEach(opt => { opt.selected = true; });
+    }
     // Rebuild plot without triggering AI analysis
     rebuildPlot(allSectors);
     // Reset analysis panel to placeholder state
@@ -253,6 +262,7 @@ function rebuildPlot(selectedSectors) {
             ? { title: { text: 'Sector' }, orientation: 'h', x: 0, y: -0.45, xanchor: 'left', yanchor: 'top' }
             : { title: { text: 'Sector' }, orientation: 'v', x: 1.02, y: 1, xanchor: 'left', yanchor: 'top' },
         hovermode: 'closest',
+        height: 500,
         margin: isMobile
             ? { l: 60, r: 10, t: 50, b: 260 }
             : { l: 70, r: 40, t: 70, b: 80 },
@@ -261,7 +271,7 @@ function rebuildPlot(selectedSectors) {
     };
     
     try {
-        window.Plotly.newPlot(plot, traces, layout, { responsive: true });
+        window.Plotly.react(plot, traces, layout, { responsive: true });
     } catch (e) {
         console.error('Plotly error:', e);
     }
@@ -270,19 +280,36 @@ function rebuildPlot(selectedSectors) {
 /**
  * Update plot based on current filter selections
  */
+let _analysisTimer = null;
+
 function updateFilter() {
-    const select = document.getElementById('sectorFilter');
-    if (!select) return;
-    
-    const selected = Array.from(select.selectedOptions).map(opt => opt.value);
-    
-    if (selected.length === 0) {
-        // If nothing selected, show all
-        rebuildPlot(allSectors);
-        renderAnalysis(allSectors);
+    // Support both checkbox list (ziekteverzuim) and <select multiple> (index)
+    const checkboxes = document.querySelectorAll('.sector-checkbox');
+    let selected;
+    let hasExplicitSelection;
+    if (checkboxes.length > 0) {
+        const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+        hasExplicitSelection = checked.length > 0;
+        selected = hasExplicitSelection ? checked : allSectors;
     } else {
-        rebuildPlot(selected);
-        renderAnalysis(selected);
+        const sel = document.getElementById('sectorFilter');
+        const opts = sel ? Array.from(sel.selectedOptions).map(o => o.value) : [];
+        hasExplicitSelection = opts.length > 0;
+        selected = hasExplicitSelection ? opts : allSectors;
+    }
+    rebuildPlot(selected);
+    // Only trigger AI analysis when at least one sector is explicitly selected
+    clearTimeout(_analysisTimer);
+    if (hasExplicitSelection) {
+        _analysisTimer = setTimeout(() => renderAnalysis(selected), 800);
+    } else {
+        // Reset analysis panel to placeholder when nothing is selected
+        const placeholder = document.getElementById('analysisPlaceholder');
+        const historyPanel = document.getElementById('historyPanel');
+        const forecastPanel = document.getElementById('forecastPanel');
+        if (placeholder) { placeholder.innerHTML = 'Pas een filter aan om een AI-trendanalyse te genereren.'; placeholder.style.display = 'block'; }
+        if (historyPanel) historyPanel.style.display = 'none';
+        if (forecastPanel) forecastPanel.style.display = 'none';
     }
 }
 
@@ -360,8 +387,13 @@ function renderAnalysis(selectedSectors) {
  * Select all sectors in the filter
  */
 function selectAll() {
-    const select = document.getElementById('sectorFilter');
-    Array.from(select.options).forEach(opt => opt.selected = true);
+    const checkboxes = document.querySelectorAll('.sector-checkbox');
+    if (checkboxes.length > 0) {
+        checkboxes.forEach(cb => { cb.checked = true; });
+    } else {
+        const sel = document.getElementById('sectorFilter');
+        if (sel) Array.from(sel.options).forEach(opt => { opt.selected = true; });
+    }
     updateFilter();
 }
 
@@ -369,8 +401,13 @@ function selectAll() {
  * Deselect all sectors in the filter
  */
 function deselectAll() {
-    const select = document.getElementById('sectorFilter');
-    Array.from(select.options).forEach(opt => opt.selected = false);
+    const checkboxes = document.querySelectorAll('.sector-checkbox');
+    if (checkboxes.length > 0) {
+        checkboxes.forEach(cb => { cb.checked = false; });
+    } else {
+        const sel = document.getElementById('sectorFilter');
+        if (sel) Array.from(sel.options).forEach(opt => { opt.selected = false; });
+    }
     updateFilter();
 }
 
@@ -396,10 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const companyInput = document.getElementById('companyName');
     if (companyInput) companyInput.addEventListener('keydown', e => { if (e.key === 'Enter') lookupCompany(); });
 
-    const select = document.getElementById('sectorFilter');
-    if (select) {
-        select.addEventListener('change', updateFilter);
-    }
+    // Checkbox change listeners are bound inline via onchange="updateFilter()"
     
     // Add listeners for year range inputs
     const yearMin = document.getElementById('yearMin');

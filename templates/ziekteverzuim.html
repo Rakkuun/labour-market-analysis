@@ -108,11 +108,16 @@
                             <i class="bi bi-x-circle"></i> Deselect all
                         </button>
                     </div>
-                    <select id="sectorFilter" class="form-select" multiple>
+                    <div id="sectorFilter" class="sector-checkbox-list">
                         {% for sector in sectors %}
-                        <option value="{{ sector }}" selected>{{ sector }}</option>
+                        <div class="form-check">
+                            <input class="form-check-input sector-checkbox" type="checkbox"
+                                   id="sector-cb-{{ loop.index }}" value="{{ sector }}" checked
+                                   onchange="updateFilter()">
+                            <label class="form-check-label small" for="sector-cb-{{ loop.index }}">{{ sector }}</label>
+                        </div>
                         {% endfor %}
-                    </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -430,11 +435,8 @@
     const chatHistory = [];  // [{role, content}]
 
     function getActiveSector() {
-        // Read from the sector filter — take first selected option
-        const sel = document.getElementById('sectorFilter');
-        if (!sel) return '';
-        const selected = Array.from(sel.selectedOptions).map(o => o.value);
-        return selected.length === 1 ? selected[0] : '';
+        const checked = Array.from(document.querySelectorAll('.sector-checkbox:checked')).map(cb => cb.value);
+        return checked.length === 1 ? checked[0] : '';
     }
 
     function appendMessage(role, text) {

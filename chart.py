@@ -94,6 +94,7 @@ def create_plotly_figure(sector_data, sectors, pred_dict=None):
         yaxis=dict(title=dict(text='Ziekteverzuim %', standoff=10)),
         legend_title='Sector',
         hovermode='closest',
+        height=500,
         margin=dict(l=70, r=40, t=70, b=80),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
