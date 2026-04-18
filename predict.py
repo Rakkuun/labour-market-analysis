@@ -1,8 +1,9 @@
+"""Linear-regression trend analysis and quarterly predictions per sector."""
 import logging
+import sqlite3
 
 import numpy as np
 import pandas as pd
-import sqlite3
 from sklearn.linear_model import LinearRegression
 
 from db import DB_PATH, extract_quarter_number

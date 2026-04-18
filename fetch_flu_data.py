@@ -8,12 +8,13 @@ Run this script once (or to refresh):
     python fetch_flu_data.py
 """
 
-import sqlite3
-import urllib.request
 import csv
-import io
 import datetime
 import logging
+import sqlite3
+import urllib.request
+
+from db import DB_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +23,9 @@ FLUNET_URL = (
     'https://xmart-api-public.who.int/FLUMART/VIW_FNT'
     '?%24format=csv&%24filter=COUNTRY_CODE%20eq%20%27NLD%27'
 )
-DB_PATH = 'data.db'
 
+
+# ── Fetch ──────────────────────────────────────────────────────────────────────────
 
 def _iso_week_to_quarter(year: int, week: int) -> int:
     """Return calendar quarter (1-4) for a given ISO year+week."""
@@ -37,6 +39,7 @@ def _iso_week_to_quarter(year: int, week: int) -> int:
 
 
 def fetch_and_store():
+    """Download WHO FluNet weekly data for NLD and store quarterly aggregates in SQLite."""
     logger.info('Downloading WHO FluNet data for Netherlands…')
     with urllib.request.urlopen(FLUNET_URL, timeout=30) as response:
         content = response.read().decode('utf-8')

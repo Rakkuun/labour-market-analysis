@@ -1,6 +1,8 @@
+"""Fetch CBS absenteeism data via cbsodata and persist it to SQLite."""
 import logging
-import pandas as pd
 import sqlite3
+
+import pandas as pd
 
 from db import DB_PATH
 
@@ -12,7 +14,8 @@ except ImportError:
     logger.warning('cbsodata not installed. Install with: pip install cbsodata')
     cbsodata = None
 
-# Helper functions for date conversion
+
+# ── Period-conversion helpers ─────────────────────────────────────────────────────
 quarters_map = {
     '1e kwartaal': '01',
     '2e kwartaal': '04',
@@ -46,6 +49,8 @@ def convert_cbs_month_to_date(period_str):
             return pd.to_datetime(f"{year}-{months_map[month_name]}-01")
     return pd.NaT
 
+
+# ── Fallback data ──────────────────────────────────────────────────────────────────
 _FALLBACK_DATA = {
     'Perioden': [
         '2020KW01', '2020KW02', '2021KW01', '2021KW02', '2022KW01', '2022KW02',
@@ -72,6 +77,9 @@ def _save_fallback():
     conn.close()
     logger.warning('Fallback dummy-data opgeslagen in database.')
     return df
+
+
+# ── CBS fetch ─────────────────────────────────────────────────────────────────────
 
 
 def fetch_absenteeism_data():

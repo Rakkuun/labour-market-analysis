@@ -1,6 +1,8 @@
+"""Clean and normalise raw CBS absenteeism data into cleaned_absenteeism."""
 import logging
-import pandas as pd
 import sqlite3
+
+import pandas as pd
 
 from db import DB_PATH
 
@@ -13,6 +15,7 @@ _CBS_PERIOD_COL = 'Perioden'
 
 
 def preprocess_data():
+    """Read raw absenteeism table, normalise columns, and write cleaned_absenteeism."""
     conn = sqlite3.connect(DB_PATH)
     df = pd.read_sql('SELECT * FROM absenteeism', conn)
     conn.close()

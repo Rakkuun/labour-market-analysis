@@ -10,7 +10,11 @@ import pandas as pd
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data.db')
 
 
-# ── Admin tables ──────────────────────────────────────────────────────────────
+def _now() -> str:
+    return datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
+
+
+# ── Admin log tables ──────────────────────────────────────────────────────────
 
 def init_admin_tables():
     """Create admin log tables if they don't exist yet."""
@@ -120,9 +124,7 @@ def get_api_usage_stats() -> dict:
     }
 
 
-def _now() -> str:
-    return datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
-
+# ── Data access ───────────────────────────────────────────────────────────────
 
 def load_data_from_db():
     """Load absenteeism and prediction data from SQLite.
