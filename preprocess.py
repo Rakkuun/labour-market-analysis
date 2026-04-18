@@ -8,9 +8,6 @@ from db import DB_PATH
 
 logger = logging.getLogger(__name__)
 
-# Actual column names returned by the CBS OData API (table 80072ned)
-_CBS_SECTOR_COL = 'BedrijfstakkenBedrijfsgrootteSBI2008'
-_CBS_ABSENCE_COL = 'Ziekteverzuimpercentage_1'
 _CBS_PERIOD_COL = 'Perioden'
 
 
