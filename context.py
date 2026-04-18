@@ -3,7 +3,7 @@ import datetime
 import json
 
 from chart import create_plotly_figure, create_seasonal_figure, create_flu_comparison_figure
-from db import build_sector_data, extract_quarter_number, load_flu_data
+from db import build_sector_data, extract_quarter_number, get_last_refresh_date, load_flu_data
 
 
 def build_pred_dict(pred_df):
@@ -47,6 +47,7 @@ def prepare_context(df, pred_df):
             'default_max_year': max_year,
             'table': '<p>No data available.</p>',
             'pred_table': '<p>No predictions available.</p>',
+            'last_refresh_cbs': get_last_refresh_date('cbs'),
         }
 
     sector_data, sectors = build_sector_data(df)
@@ -120,4 +121,5 @@ def prepare_context(df, pred_df):
         'table': table,
         'pred_table': pred_table,
         'insights': insights,
+        'last_refresh_cbs': get_last_refresh_date('cbs'),
     }

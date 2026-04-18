@@ -28,8 +28,9 @@ logger = logging.getLogger(__name__)
 # ── App ───────────────────────────────────────────────────────────────────────
 app = Flask(__name__)
 
+_debug = os.getenv('FLASK_DEBUG', '0') == '1'
 cache = Cache(app, config={
-    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_TYPE': 'NullCache' if _debug else 'SimpleCache',
     'CACHE_DEFAULT_TIMEOUT': 3600,   # 1 hour; invalidated earlier on refresh
 })
 

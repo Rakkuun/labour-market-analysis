@@ -124,6 +124,22 @@ def get_api_usage_stats() -> dict:
     }
 
 
+def get_last_refresh_date(source: str) -> str | None:
+    """Return the finished_at timestamp of the last successful refresh for *source*, or None."""
+    conn = sqlite3.connect(DB_PATH)
+    try:
+        cur = conn.execute(
+            "SELECT finished_at FROM refresh_log WHERE source=? AND status='ok' ORDER BY id DESC LIMIT 1",
+            (source,),
+        )
+        row = cur.fetchone()
+        return row[0] if row else None
+    except Exception:
+        return None
+    finally:
+        conn.close()
+
+
 # ── Data access ───────────────────────────────────────────────────────────────
 
 def load_data_from_db():

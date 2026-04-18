@@ -144,7 +144,43 @@
         </div>
     </div>
 
+    <!-- Shared graph explainer modal — populated dynamically via data-explainer -->
+    <div class="modal fade" id="explainerModal" tabindex="-1" aria-labelledby="explainerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="explainerModalLabel">
+                        <i class="bi bi-info-circle me-2 text-primary"></i>
+                        <span id="explainerModalTitle"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+                </div>
+                <div class="modal-body" id="explainerModalBody"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-dismiss="modal">Sluiten</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    // ── Explainer modal — wire all [data-explainer] buttons ──────────────────
+    (function () {
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-explainer]');
+            if (!btn) return;
+            const tpl = document.getElementById(btn.getAttribute('data-explainer'));
+            if (!tpl) return;
+            document.getElementById('explainerModalTitle').textContent =
+                btn.getAttribute('data-explainer-title') || '';
+            document.getElementById('explainerModalBody').innerHTML = tpl.innerHTML;
+            bootstrap.Modal.getOrCreateInstance(
+                document.getElementById('explainerModal')
+            ).show();
+        });
+    }());
+    </script>
     <script>
     (function () {
         const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/1Fcyz5ctBvsQy13nnhGf4PQirWIruSqsmPkrjZtFydco/export?format=csv';

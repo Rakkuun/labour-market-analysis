@@ -119,19 +119,31 @@
 
         <!-- Main Plot -->
         <div class="col-lg-9">
-            <div class="plot-container">
-                {{ plot_html|safe }}
-            </div>
-            <div id="analysisPanel" class="analysis-panel mt-4 p-4 rounded shadow-sm bg-white">
-                <h5><i class="bi bi-stars"></i> Automatische analyse</h5>
-                <div id="historyPanel" style="display:none;">
-                    <h6><i class="bi bi-clock-history"></i> Historische trendanalyse</h6>
-                    <p id="analysisText" class="mb-0 text-muted"></p>
+            <div class="insight-chart-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-semibold mb-0">
+                        <i class="bi bi-clipboard2-pulse me-2 text-primary"></i>Ziekteverzuim per sector
+                    </h6>
+                    <button type="button" class="btn btn-sm btn-outline-secondary"
+                            data-explainer="explainer-ziekteverzuim-main"
+                            data-explainer-title="Ziekteverzuim per sector">
+                        <i class="bi bi-info-circle me-1"></i>Over deze grafiek
+                    </button>
                 </div>
-                <p id="analysisPlaceholder" class="mb-0 text-muted">Pas een filter aan om een AI-trendanalyse te genereren.</p>
-                <div id="forecastPanel" class="mt-3 pt-3 border-top" style="display:none;">
-                    <h6><i class="bi bi-graph-up-arrow"></i> Verwachting komende kwartalen</h6>
-                    <p id="forecastText" class="mb-0 text-muted"></p>
+                <div>
+                    {{ plot_html|safe }}
+                </div>
+                <div id="analysisPanel" class="analysis-panel mt-3 pt-3 border-top">
+                    <h6 class="mb-3"><i class="bi bi-stars me-1"></i> Automatische analyse</h6>
+                    <div id="historyPanel" style="display:none;">
+                        <h6><i class="bi bi-clock-history"></i> Historische trendanalyse</h6>
+                        <p id="analysisText" class="mb-0 text-muted"></p>
+                    </div>
+                    <p id="analysisPlaceholder" class="mb-0 text-muted">Pas een filter aan om een AI-trendanalyse te genereren.</p>
+                    <div id="forecastPanel" class="mt-3 pt-3 border-top" style="display:none;">
+                        <h6><i class="bi bi-graph-up-arrow"></i> Verwachting komende kwartalen</h6>
+                        <p id="forecastText" class="mb-0 text-muted"></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -279,6 +291,92 @@
     </section>
 
 </div>
+
+<!-- ── Explainer content for the main ziekteverzuim chart ──────────────────── -->
+<template id="explainer-ziekteverzuim-main">
+
+    <!-- Databron -->
+    <div class="mb-4">
+        <h6 class="fw-bold d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-database text-primary"></i>Databron
+        </h6>
+        <table class="table table-sm table-bordered small mb-2">
+            <tbody>
+                <tr>
+                    <th class="text-nowrap bg-light" style="width:38%">Tabel</th>
+                    <td>
+                        <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/80072ned/table"
+                           target="_blank" rel="noopener">CBS StatLine – 80072ned</a>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="bg-light">Indicator</th>
+                    <td>Ziekteverzuimpercentage per bedrijfstak (SBI 2008)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">Dekking</th>
+                    <td>Nederland · 1996 – heden · per kwartaal · 39 sectoren</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">Licentie</th>
+                    <td>CBS open data (<a href="https://www.cbs.nl/nl-nl/onze-diensten/open-data/statline-als-open-data" target="_blank" rel="noopener">CC BY 4.0</a>)</td>
+                </tr>
+                <tr>
+                    <th class="bg-light">Laatste verversing</th>
+                    <td>{{ last_refresh_cbs or '—' }}</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-muted small mb-0">
+            <i class="bi bi-arrow-repeat me-1"></i>Data wordt elke nacht om 03:00 UTC automatisch bijgewerkt via de CBS OData-API.
+        </p>
+    </div>
+
+    <hr>
+
+    <!-- Prognosemodel -->
+    <div>
+        <h6 class="fw-bold d-flex align-items-center gap-2 mb-3">
+            <i class="bi bi-graph-up-arrow text-primary"></i>Prognosemodel — Volgende 4 kwartalen
+        </h6>
+        <p class="small mb-3">
+            De prognoses worden berekend met een <strong>seizoensgecorrigeerd lineair regressiemodel</strong>
+            per sector, gefit op alle beschikbare kwartaaldata (minimaal 4 datapunten vereist).
+        </p>
+
+        <h6 class="fw-semibold small mb-2">Features</h6>
+        <ul class="small mb-3">
+            <li>
+                <strong>Tijdsindex</strong> — een doorlopende numerieke as:
+                <code>jaar + (kwartaal − 1) × 0,25</code>.
+                De regressiecoëfficiënt op deze as bepaalt de langetermijntrend
+                (positief = stijgend, negatief = dalend verzuim).
+            </li>
+            <li>
+                <strong>Seizoensdummies</strong> — afzonderlijke binaire variabelen voor
+                Q2, Q3 en Q4. Q1 (winter) dient als basisniveau. Elke dummy schat de
+                gemiddelde afwijking van dat kwartaal ten opzichte van Q1.
+            </li>
+        </ul>
+
+        <h6 class="fw-semibold small mb-2">Residu-correctie</h6>
+        <p class="small mb-3">
+            Na het fitten wordt het verschil (<em>residu</em>) berekend tussen de werkelijke
+            laatste gemeten waarde en de modelfit op dat punt. Dit residu wordt opgeteld bij
+            alle prognoses. Zo sluit de prognose naadloos aan op de meest recente meting,
+            ook wanneer het model de recente trend licht over- of onderschat.
+        </p>
+
+        <h6 class="fw-semibold small mb-2">Beperkingen</h6>
+        <ul class="small mb-0">
+            <li>Het model extrapoleeert een <em>lineaire</em> trend; structurele wendingen worden niet voorspeld.</li>
+            <li>Seizoenspatronen worden als stabiel over de tijd verondersteld.</li>
+            <li>Prognoses zijn indicatief en niet bedoeld als financieel of beleidsadvies.</li>
+        </ul>
+    </div>
+
+</template>
+
 {% endblock %}
 
 {% block page_scripts %}
