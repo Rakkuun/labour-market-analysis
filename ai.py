@@ -191,7 +191,7 @@ _LOOKUP_PROMPT = """Je bent een expert in de Nederlandse CBS-bedrijfsclassificat
 Gegeven bedrijfsnaam: "{company_name}"
 
 Kies voor dit bedrijf de meest passende waarden uit de onderstaande lijsten.
-Je MOET exact de vermelde waarden gebruiken — geen variaties, geen omschrijvingen.
+Kopieer elke waarde LETTERLIJK en VOLLEDIG zoals hieronder vermeld — inclusief zowel de code als de naam. Geef NOOIT alleen de code (bijv. nooit "C", altijd "C Industrie").
 
 BEDRIJFSSECTOR (kies precies één waarde):
 A Landbouw, bosbouw en visserij
@@ -266,30 +266,34 @@ def lookup_company_info(company_name):
 
     data = json.loads(content.strip())
 
-    # Allowed exact values per field — AI must return one of these or null
-    _ALLOWED = {
-        'bedrijfstak': {
-            '10-12 Voedings-, genotmiddelenindustrie',
-            '17-18 Papier- en grafische industrie',
-            '19-22 Raffinaderijen en chemie',
-            '24-30, 33 Metaal-elektro industrie',
-            '45 Autohandel en -reparatie',
-            '46 Groothandel en handelsbemiddeling',
-            "47 Detailhandel (niet in auto's)",
-            '49 Vervoer over land',
-            '86 Gezondheidszorg',
-            '87 Verpleging en zorg met overnachting',
-            '88 Welzijnszorg zonder overnachting',
-            '812 Schoonmaakbedrijven',
-        },
-        'bedrijfsklasse': {'861 Ziekenhuizen'},
-    }
+    # Normalise all sector fields against actual DB values.
+    # DeepSeek sometimes returns only the numeric/letter code (e.g. "C" or "24-30, 33")
+    # instead of the full string.  We resolve these via prefix matching so the value
+    # sent to the frontend and /api/compare always matches a real dataset entry.
+    try:
+        from db import load_data_from_db, build_sector_data
+        _df, _ = load_data_from_db()
+        _, _valid_sectors = build_sector_data(_df)
+        _valid_set = set(_valid_sectors)
+    except Exception:
+        _valid_set = set()
 
-    # Normalise: replace empty strings or non-whitelisted values with None
-    for field in ('bedrijfstak', 'bedrijfsklasse'):
-        val = data.get(field)
-        if not val or val not in _ALLOWED[field]:
-            data[field] = None
+    def _resolve(val):
+        """Return canonical sector string or None."""
+        if not val:
+            return None
+        if not _valid_set:
+            return val  # DB unavailable — pass through as-is
+        if val in _valid_set:
+            return val
+        # Prefix match: e.g. "C" matches "C Industrie", "24-30, 33" matches "24-30, 33 Metaal-elektro industrie"
+        prefix = val.rstrip()
+        matches = [s for s in _valid_set if s == prefix or s.startswith(prefix + ' ')]
+        return matches[0] if len(matches) == 1 else None
+
+    for field in ('bedrijfssector', 'bedrijfstak', 'bedrijfsklasse'):
+        resolved = _resolve(data.get(field))
+        data[field] = resolved  # None for non-matching / empty
 
     return data
 

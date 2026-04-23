@@ -159,6 +159,8 @@ def api_compare():
         sector_values   = sector_data[matched_sector]['values']
         last4_values    = sector_values[-4:]   if len(sector_values)   >= 4 else sector_values
         last4_quarters  = sector_quarters[-4:] if len(sector_quarters) >= 4 else sector_quarters
+        if not last4_values:
+            return jsonify({'error': f'Geen kwartaaldata beschikbaar voor sector: {matched_sector}'}), 400
         sector_recent_avg = round(sum(last4_values) / len(last4_values), 2)
 
         # Actual national average per quarter (mean across all sectors)
