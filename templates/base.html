@@ -81,17 +81,13 @@
                 </div>
                 <div class="modal-body">
                     <h6 class="fw-bold">Welke data slaan we op?</h6>
-                    <p class="text-muted small">peil.ai slaat <strong>geen</strong> data op onze servers op. We gebruiken uitsluitend cookies in jouw browser om jouw sessie-instellingen te onthouden.</p>
+                    <p class="text-muted small">peil.ai slaat <strong>geen</strong> data op onze servers op. We gebruiken uitsluitend lokale opslag in jouw browser (cookies en localStorage) om jouw instellingen te onthouden. Deze data verlaat jouw apparaat nooit.</p>
 
-                    <h6 class="fw-bold mt-3">Cookies — bedrijfsprofiel (SBI 2008 linker)</h6>
+                    <h6 class="fw-bold mt-3">Cookies — bedrijfsprofiel (SBI 2008-linker)</h6>
                     <p class="text-muted small mb-2">Wanneer je op het ziekteverzuim-dashboard een bedrijfsnaam opzoekt via de <em>CBS SBI 2008-linker</em>, slaan we het resultaat op in cookies in jouw eigen browser. Zo hoef je je bedrijf niet bij elk bezoek opnieuw op te zoeken.</p>
                     <table class="table table-sm table-bordered small mb-1">
                         <thead class="table-light">
-                            <tr>
-                                <th>Cookie</th>
-                                <th>Inhoud</th>
-                                <th>Bewaartermijn</th>
-                            </tr>
+                            <tr><th>Cookie</th><th>Inhoud</th><th>Bewaartermijn</th></tr>
                         </thead>
                         <tbody>
                             <tr><td><code>company_name</code></td><td>De ingevoerde bedrijfsnaam</td><td>365 dagen</td></tr>
@@ -101,12 +97,29 @@
                             <tr><td><code>bedrijfsgrootte</code></td><td>Geschatte bedrijfsgrootte</td><td>365 dagen</td></tr>
                         </tbody>
                     </table>
-                    <p class="text-muted small">Deze cookies verlaten jouw browser nooit — ze worden niet naar onze servers of derden gestuurd.</p>
 
-                    <h6 class="fw-bold mt-3">Cookies verwijderen</h6>
-                    <p class="text-muted small mb-0">Gebruik de knop <strong>"Verwijder profiel"</strong> op het ziekteverzuim-dashboard, of verwijder de cookies via de instellingen van je browser.</p>
+                    <h6 class="fw-bold mt-4">localStorage — "Mijn organisatie" (ziekteverzuim)</h6>
+                    <p class="text-muted small mb-2">Wanneer je de wizard "Mijn organisatie" doorloopt, slaan we jouw keuze en ingevoerde verzuimcijfers op in de <em>localStorage</em> van je browser. Zo wordt je persoonlijke analyse hersteld bij een volgend bezoek, zonder dat je de stappen opnieuw hoeft te doorlopen.</p>
+                    <table class="table table-sm table-bordered small mb-1">
+                        <thead class="table-light">
+                            <tr><th>Sleutel</th><th>Inhoud</th><th>Bewaartermijn</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>peil_ob_done</code></td><td><code>explore</code> of <code>guided</code> — welke modus je hebt gekozen</td><td>Tot handmatig wissen</td></tr>
+                            <tr><td><code>peil_ob_data</code></td><td>Bedrijfsnaam, CBS-classificatie en ingevoerde kwartaalcijfers (JSON)</td><td>Tot handmatig wissen</td></tr>
+                        </tbody>
+                    </table>
+                    <p class="text-muted small">De ingevoerde verzuimcijfers worden <strong>uitsluitend</strong> gebruikt om een vergelijking met sectordata te berekenen. Ze worden niet opgeslagen op onze servers.</p>
 
-                    <h6 class="fw-bold mt-3">Externe databronnen</h6>
+                    <h6 class="fw-bold mt-4">Opgeslagen data verwijderen</h6>
+                    <p class="text-muted small mb-1">Je kunt jouw data op twee manieren verwijderen:</p>
+                    <ul class="text-muted small mb-0">
+                        <li>Klik op <strong>"Opnieuw instellen"</strong> onderaan het bedrijfsprofiel op het ziekteverzuim-dashboard — dit wist zowel de cookies als de localStorage-instellingen voor de organisatiefunctie.</li>
+                        <li>Klik op <strong>"Verwijder profiel"</strong> om alleen de CBS-profielcookies te wissen.</li>
+                        <li>Of wis alle lokale data via de instellingen van je browser.</li>
+                    </ul>
+
+                    <h6 class="fw-bold mt-4">Externe databronnen</h6>
                     <p class="text-muted small mb-0">De grafieken zijn gebaseerd op publiek beschikbare data van CBS en WHO FluNet. Er worden geen persoons- of bedrijfsgegevens naar deze bronnen gestuurd.</p>
                 </div>
                 <div class="modal-footer">

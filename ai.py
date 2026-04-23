@@ -121,6 +121,69 @@ Begin elke sectie direct met de inhoud, zonder labels, koppen, HTML of Markdown.
         return f'Fout bij AI-analyse: {e}', ''
 
 
+# ── Personalised comparison analysis ─────────────────────────────────────────
+
+def compare_with_ai(sector, sector_data, pred_dict, own_quarters, own_avg,
+                    sector_recent_avg, national_avg):
+    """Generate a personalised Dutch analysis comparing own data to sector.
+
+    Returns:
+        tuple[str, str]: (analysis_text, forecast_text)
+    """
+    # Build recent sector trend (last 8 quarters)
+    sq = sector_data[sector]['quarters'][-8:]
+    sv = sector_data[sector]['values'][-8:]
+    sector_trend = [{'kwartaal': q, 'waarde': v} for q, v in zip(sq, sv)]
+
+    forecast_stats = _build_forecast_stats([sector], pred_dict)
+    forecast_str = json.dumps(forecast_stats, indent=2) if forecast_stats else 'Geen prognosedata beschikbaar.'
+
+    if own_avg is not None:
+        diff = round(own_avg - sector_recent_avg, 2)
+        diff_str = f'+{diff}%' if diff >= 0 else f'{diff}%'
+        eigen_blok = f"""EIGEN ORGANISATIE:
+- Gemiddeld verzuim laatste kwartalen: {own_avg}%
+- Kwartaalcijfers: {json.dumps(own_quarters)}
+- Verschil t.o.v. sectorgemiddelde: {diff_str}"""
+    else:
+        eigen_blok = 'EIGEN ORGANISATIE: geen eigen verzuimcijfers opgegeven.'
+
+    prompt = f"""Je bent een arbeidsmarktanalist die ziekteverzuim analyseert voor een HR-professional.
+
+SECTOR: {sector}
+SECTORGEMIDDELDE (laatste 4 kwartalen): {sector_recent_avg}%
+NATIONAAL GEMIDDELDE: {national_avg}%
+RECENTE SECTORTREND (laatste 8 kwartalen): {json.dumps(sector_trend)}
+{eigen_blok}
+
+KWARTAALPROGNOSES SECTOR:
+{forecast_str}
+
+Geef je antwoord in exact dit formaat, twee secties gescheiden door "###":
+
+Eerste sectie: 2-3 zinnen analyse. {"Vergelijk het eigen verzuim expliciet met het sectorgemiddelde en benoem of de organisatie boven of onder gemiddeld scoort." if own_avg is not None else "Beschrijf de recente sectortrend en wat dit betekent voor organisaties in deze sector."}
+###
+Tweede sectie: 2-3 zinnen concrete aanbeveling of verwachting voor de komende kwartalen, gebaseerd op de prognosedata en sectortrend.
+
+Begin elke sectie direct met de inhoud, zonder labels, koppen, HTML of Markdown. Gebruik uitsluitend platte tekst. Schrijf in professioneel Nederlands. Spreek de lezer direct aan als "jouw organisatie". Wees beknopt en specifiek."""
+
+    try:
+        t0 = time.monotonic()
+        response = _get_client().chat.completions.create(
+            model=_DEEPSEEK_MODEL,
+            messages=[{'role': 'user', 'content': prompt}],
+            max_tokens=500,
+            temperature=0.7,
+        )
+        _log('compare', response, int((time.monotonic() - t0) * 1000))
+        def _strip(text):
+            return re.sub(r'<[^>]+>', '', text).strip()
+        parts = response.choices[0].message.content.split('###', 1)
+        return _strip(parts[0]), _strip(parts[1]) if len(parts) > 1 else ''
+    except Exception as e:
+        return f'Fout bij AI-analyse: {e}', ''
+
+
 # ── Company CBS classification ────────────────────────────────────────────────
 
 _LOOKUP_PROMPT = """Je bent een expert in de Nederlandse CBS-bedrijfsclassificatie (SBI 2008).

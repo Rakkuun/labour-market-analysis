@@ -2,6 +2,94 @@
 {% block title %}Ziekteverzuim | peil.ai{% endblock %}
 
 {% block content %}
+<!-- ── Onboarding modal ──────────────────────────────────────────────────── -->
+<div class="modal fade" id="onboardingModal" tabindex="-1" aria-labelledby="onboardingModalLabel" aria-modal="true" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <!-- Step 1: keuze -->
+            <div id="ob-step-1">
+                <div class="modal-body p-4 pb-2 text-center">
+                    <div class="ob-logo mb-3"><i class="bi bi-activity fs-1 text-primary"></i></div>
+                    <h5 class="fw-bold mb-1">Ziekteverzuim dashboard</h5>
+                    <p class="text-muted small mb-4">Wat wil je doen?</p>
+                    <div class="row g-3 text-start mb-3">
+                        <div class="col-6">
+                            <button class="ob-choice-card w-100 h-100" id="ob-choose-explore" onclick="obChooseExplore()">
+                                <i class="bi bi-search fs-3 text-primary mb-2 d-block"></i>
+                                <strong class="d-block mb-1">Verkennen</strong>
+                                <span class="text-muted small">Bekijk CBS-data over ziekteverzuim per sector, kwartaal en trend.</span>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="ob-choice-card w-100 h-100" id="ob-choose-guided" onclick="obChooseGuided()">
+                                <i class="bi bi-bar-chart-line fs-3 text-primary mb-2 d-block"></i>
+                                <strong class="d-block mb-1">Mijn organisatie</strong>
+                                <span class="text-muted small">Vergelijk jouw verzuim met de sector en ontvang een persoonlijke analyse.</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: bedrijfsnaam -->
+            <div id="ob-step-2" style="display:none;">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn btn-link btn-sm text-muted p-0" onclick="obGoStep(1)"><i class="bi bi-arrow-left me-1"></i>Terug</button>
+                    <span class="ms-2 text-muted small">Stap 1 van 2</span>
+                </div>
+                <div class="modal-body p-4 pt-2">
+                    <h6 class="fw-bold mb-1">Wat is de naam van jouw organisatie?</h6>
+                    <p class="text-muted small mb-3">We zoeken automatisch de juiste CBS-sector op.</p>
+                    <div class="input-group mb-2">
+                        <input type="text" id="ob-company-input" class="form-control" placeholder="Bijv. Albert Heijn, ASML…">
+                        <button class="btn btn-primary" type="button" onclick="obLookupCompany()">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                    <div id="ob-company-loading" style="display:none;" class="text-muted small mb-2">
+                        <span class="spinner-border spinner-border-sm me-1"></span> Classificatie ophalen…
+                    </div>
+                    <div id="ob-company-error" class="text-danger small mb-2" style="display:none;"></div>
+                    <div id="ob-company-result" style="display:none;" class="mb-3">
+                        <div class="alert alert-success py-2 px-3 mb-2 small">
+                            <i class="bi bi-check-circle me-1"></i>
+                            Gevonden: <strong id="ob-sector-label"></strong>
+                            <button type="button" class="btn btn-link btn-sm p-0 ms-2" onclick="obResetCompany()">Wijzigen</button>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary" id="ob-step2-next" onclick="obGoStep(3)" disabled>Volgende <i class="bi bi-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: verzuimcijfers -->
+            <div id="ob-step-3" style="display:none;">
+                <div class="modal-header border-0 pb-0">
+                    <button type="button" class="btn btn-link btn-sm text-muted p-0" onclick="obGoStep(2)"><i class="bi bi-arrow-left me-1"></i>Terug</button>
+                    <span class="ms-2 text-muted small">Stap 2 van 2</span>
+                </div>
+                <div class="modal-body p-4 pt-2">
+                    <h6 class="fw-bold mb-1">Wat is het ziekteverzuim in jouw organisatie?</h6>
+                    <p class="text-muted small mb-3">Voer de cijfers in voor de laatste 4 kwartalen (als percentage, bijv. 4,2).</p>
+                    <div id="ob-quarters-grid" class="row g-2 mb-3">
+                        <!-- ingevuld door JS op basis van huidig kwartaal -->
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="ob-no-data" onchange="obToggleNoData()">
+                        <label class="form-check-label small text-muted" for="ob-no-data">Ik heb deze cijfers niet</label>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button class="btn btn-primary" onclick="obFinish()">Bekijk mijn analyse <i class="bi bi-arrow-right ms-1"></i></button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <div class="container-lg">
 
     <!-- Breadcrumb -->
@@ -17,7 +105,12 @@
     <div class="row mb-4">
         <div class="col-12">
             <div class="company-panel p-4 rounded shadow-sm bg-white">
-                <h5 class="mb-1"><i class="bi bi-building"></i> Bedrijfsprofiel</h5>
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h5 class="fw-semibold mb-0"><i class="bi bi-building"></i> Bedrijfsprofiel</h5>
+                    <button type="button" id="obOpenBtn" class="btn btn-sm btn-outline-primary" onclick="obOpen()" style="display:none;">
+                        <i class="bi bi-bar-chart-line me-1"></i>Mijn organisatie instellen
+                    </button>
+                </div>
                 <p class="text-muted small mb-3">Voer een bedrijfsnaam in om de CBS-classificatie (SBI 2008) automatisch op te zoeken en op te slaan.</p>
                 <div class="d-flex gap-2 mb-3">
                     <input type="text" id="companyName" class="form-control" placeholder="Bijv. Albert Heijn, ASML, Rijksoverheid…" style="max-width:400px;">
@@ -64,6 +157,43 @@
                     </div>
                     <div id="companyFilterInfo" class="company-filter-info mt-3" style="display:none;"></div>
                 </div>
+
+                <!-- ── Personalisatie (alleen zichtbaar na guided onboarding) ── -->
+                <div id="compareSection" style="display:none;" class="mt-4 pt-4 border-top">
+                    <div class="row g-4">
+                        <!-- Vergelijkingskaart -->
+                        <div class="col-lg-5">
+                            <h6 class="fw-semibold mb-2"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Jouw organisatie vs. sector</h6>
+                            <div id="compareLoading" class="text-muted small"><span class="spinner-border spinner-border-sm me-1"></span> Gegevens worden geladen…</div>
+                            <div id="compareResult" style="display:none;">
+                                <table class="table table-sm mb-2">
+                                    <thead class="table-light"><tr><th>Kwartaal</th><th>Jouw org.</th><th>Sector</th><th>Nationaal</th></tr></thead>
+                                    <tbody id="cmpTableBody">
+                                        <tr><td colspan="4" class="text-muted small text-center py-2"><span class="spinner-border spinner-border-sm me-1"></span></td></tr>
+                                    </tbody>
+                                </table>
+                                <p id="compareNoData" class="text-muted small mb-0" style="display:none;">Geen eigen verzuimcijfers opgegeven — hieronder staat de sectoranalyse.</p>
+                            </div>
+                        </div>
+                        <!-- Gepersonaliseerde AI-analyse -->
+                        <div class="col-lg-7">
+                            <h6 class="fw-semibold mb-2"><i class="bi bi-stars me-2 text-primary"></i>Persoonlijke analyse</h6>
+                            <div id="compareAnalysisLoading" class="text-muted small"><span class="spinner-border spinner-border-sm me-1"></span> Analyse wordt gegenereerd…</div>
+                            <div id="compareAnalysisResult" style="display:none;">
+                                <p id="compareAnalysisText" class="mb-2 text-muted small"></p>
+                                <div id="compareAnalysisForecastWrap" style="display:none;" class="mt-3 pt-3 border-top">
+                                    <h6 class="fw-semibold mb-1"><i class="bi bi-graph-up-arrow me-1 text-primary"></i>Verwachting komende kwartalen</h6>
+                                    <p id="compareAnalysisForecast" class="mb-0 text-muted small"></p>
+                                </div>
+                            </div>
+                            <div id="compareAnalysisError" class="text-danger small" style="display:none;"></div>
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-link btn-sm text-muted p-0" onclick="obReset()"><i class="bi bi-arrow-counterclockwise me-1"></i>Opnieuw instellen</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -73,13 +203,13 @@
         <!-- Sidebar Filters -->
         <div class="col-lg-3">
             <div class="filter-panel p-4">
-                <h5 class="mb-4">
+                <h5 class="fw-semibold mb-4">
                     <i class="bi bi-funnel"></i> Filters
                 </h5>
 
                 <!-- Year Range Filter -->
                 <div class="mb-4">
-                    <h6 class="mb-3">Jaar bereik</h6>
+                    <h6 class="fw-semibold mb-3">Jaar bereik</h6>
                     <div class="year-range-inputs">
                         <input type="number" id="yearMin" class="form-control"
                                min="{{ min_year }}" max="{{ max_year }}"
@@ -96,7 +226,7 @@
 
                 <!-- Sector Filter -->
                 <div>
-                    <h6 class="mb-3">Sectoren</h6>
+                    <h6 class="fw-semibold mb-3">Sectoren</h6>
                     <p class="text-muted small mb-3">Selecteer sectoren om in de grafiek te tonen.</p>
                     <div class="d-grid gap-2 mb-3">
                         <button type="button" class="btn btn-primary btn-sm btn-filter"
@@ -139,14 +269,14 @@
                     {{ plot_html|safe }}
                 </div>
                 <div id="analysisPanel" class="analysis-panel mt-3 pt-3 border-top">
-                    <h6 class="mb-3"><i class="bi bi-stars me-1"></i> Automatische analyse</h6>
+                    <h6 class="fw-semibold mb-3"><i class="bi bi-stars me-1 text-primary"></i> Automatische analyse</h6>
                     <div id="historyPanel" style="display:none;">
-                        <h6><i class="bi bi-clock-history"></i> Historische trendanalyse</h6>
+                        <h6 class="fw-semibold small mb-2"><i class="bi bi-clock-history text-primary"></i> Historische trendanalyse</h6>
                         <p id="analysisText" class="mb-0 text-muted"></p>
                     </div>
                     <p id="analysisPlaceholder" class="mb-0 text-muted">Pas een filter aan om een AI-trendanalyse te genereren.</p>
                     <div id="forecastPanel" class="mt-3 pt-3 border-top" style="display:none;">
-                        <h6><i class="bi bi-graph-up-arrow"></i> Verwachting komende kwartalen</h6>
+                        <h6 class="fw-semibold small mb-2"><i class="bi bi-graph-up-arrow text-primary"></i> Verwachting komende kwartalen</h6>
                         <p id="forecastText" class="mb-0 text-muted"></p>
                     </div>
                 </div>
@@ -159,7 +289,7 @@
         <div class="col-12">
             <div class="chat-panel p-4">
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="mb-0">
+                    <h5 class="fw-semibold mb-0">
                         <i class="bi bi-chat-dots text-primary me-2"></i>Stel een vraag over de data
                     </h5>
                     <button class="btn btn-sm btn-outline-secondary" type="button"
@@ -514,6 +644,321 @@
     document.getElementById('chatBody').addEventListener('shown.bs.collapse', () => {
         document.getElementById('chatChevron').className = 'bi bi-chevron-up';
     });
+}());
+</script>
+<script>
+// ── Onboarding modal ──────────────────────────────────────────────────────
+(function () {
+    const LS_KEY = 'peil_ob_done';
+    const LS_DATA = 'peil_ob_data';
+
+    // State
+    let _obFullData = null;      // full /api/lookup-company response
+    let _obCompanyName = null;   // company name as entered
+    let _obQuarters = [];        // [{label, value|null}]
+    let _obNoData = false;
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    function _modal() {
+        return bootstrap.Modal.getOrCreateInstance(document.getElementById('onboardingModal'));
+    }
+
+    function _quarters() {
+        // Build labels for the last 4 quarters relative to today
+        const now = new Date();
+        const currentQ = Math.floor(now.getMonth() / 3) + 1;
+        const currentY = now.getFullYear();
+        const labels = [];
+        let q = currentQ, y = currentY;
+        for (let i = 0; i < 4; i++) {
+            q--; if (q === 0) { q = 4; y--; }
+            labels.unshift(`${y} Q${q}`);
+        }
+        return labels;
+    }
+
+    function _buildQuartersGrid() {
+        const grid = document.getElementById('ob-quarters-grid');
+        grid.innerHTML = '';
+        _quarters().forEach(label => {
+            grid.innerHTML += `
+            <div class="col-6">
+                <label class="form-label small mb-1">${label}</label>
+                <div class="input-group input-group-sm">
+                    <input type="number" min="0" max="30" step="0.1"
+                           class="form-control ob-quarter-input" data-label="${label}"
+                           placeholder="bijv. 4,2">
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>`;
+        });
+    }
+
+    // ── Step navigation ──────────────────────────────────────────────────────
+
+    window.obGoStep = function (n) {
+        [1, 2, 3].forEach(i => {
+            document.getElementById(`ob-step-${i}`).style.display = i === n ? '' : 'none';
+        });
+    };
+
+    window.obOpen = function () {
+        obResetCompany();
+        _buildQuartersGrid();
+        obGoStep(2);
+        _modal().show();
+    };
+
+    window.obChooseExplore = function () {
+        localStorage.setItem(LS_KEY, 'explore');
+        _modal().hide();
+        document.getElementById('obOpenBtn').style.display = 'inline-flex';
+    };
+
+    window.obChooseGuided = function () {
+        _buildQuartersGrid();
+        obGoStep(2);
+    };
+
+    // ── Step 2: company lookup ────────────────────────────────────────────────
+
+    window.obLookupCompany = function () {
+        const name = (document.getElementById('ob-company-input').value || '').trim();
+        if (!name) return;
+        document.getElementById('ob-company-error').style.display = 'none';
+        document.getElementById('ob-company-result').style.display = 'none';
+        document.getElementById('ob-company-loading').style.display = 'block';
+        document.getElementById('ob-step2-next').disabled = true;
+
+        fetch('/api/lookup-company', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ company_name: name }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('ob-company-loading').style.display = 'none';
+            if (data.error) {
+                document.getElementById('ob-company-error').textContent = data.error;
+                document.getElementById('ob-company-error').style.display = 'block';
+                return;
+            }
+            _obFullData = data;
+            _obCompanyName = name;
+            // Display lowest available level
+            const label = data.bedrijfsklasse || data.bedrijfstak || data.bedrijfssector || 'Onbekend';
+            document.getElementById('ob-sector-label').textContent = label;
+            document.getElementById('ob-company-result').style.display = 'block';
+            document.getElementById('ob-step2-next').disabled = !label;
+        })
+        .catch(() => {
+            document.getElementById('ob-company-loading').style.display = 'none';
+            document.getElementById('ob-company-error').textContent = 'Verbindingsfout. Probeer opnieuw.';
+            document.getElementById('ob-company-error').style.display = 'block';
+        });
+    };
+
+    window.obResetCompany = function () {
+        _obFullData = null;
+        _obCompanyName = null;
+        document.getElementById('ob-company-input').value = '';
+        document.getElementById('ob-company-result').style.display = 'none';
+        document.getElementById('ob-step2-next').disabled = true;
+    };
+
+    // Allow Enter key in company input
+    document.getElementById('ob-company-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') obLookupCompany();
+    });
+
+    // ── Step 3: no-data toggle ────────────────────────────────────────────────
+
+    window.obToggleNoData = function () {
+        _obNoData = document.getElementById('ob-no-data').checked;
+        document.querySelectorAll('.ob-quarter-input').forEach(inp => {
+            inp.disabled = _obNoData;
+            if (_obNoData) inp.value = '';
+        });
+    };
+
+    // ── Finish ────────────────────────────────────────────────────────────────
+
+    window.obFinish = function () {
+        if (!_obNoData) {
+            _obQuarters = Array.from(document.querySelectorAll('.ob-quarter-input')).map(inp => ({
+                label: inp.dataset.label,
+                value: inp.value !== '' ? parseFloat(inp.value.replace(',', '.')) : null,
+            }));
+        } else {
+            _obQuarters = [];
+        }
+
+        const saved = {
+            fullData: _obFullData,
+            companyName: _obCompanyName,
+            quarters: _obQuarters,
+            noData: _obNoData,
+        };
+        localStorage.setItem(LS_KEY, 'guided');
+        localStorage.setItem(LS_DATA, JSON.stringify(saved));
+
+        _modal().hide();
+        _applyGuidedMode(saved);
+    };
+
+    window.obReset = function () {
+        localStorage.removeItem(LS_KEY);
+        localStorage.removeItem(LS_DATA);
+        _obFullData = null; _obCompanyName = null; _obQuarters = []; _obNoData = false;
+        window._obOwnData = null;
+        document.getElementById('compareSection').style.display = 'none';
+        document.getElementById('obOpenBtn').style.display = 'none';
+        // Reset company panel
+        document.getElementById('companyResult').style.display = 'none';
+        document.getElementById('companyName').value = '';
+        document.getElementById('clearCompanyBtn').style.display = 'none';
+        document.getElementById('companyFilterInfo').style.display = 'none';
+        // Reset modal step 2 form
+        obResetCompany();
+        // Reset modal step 3 form
+        const noDataCb = document.getElementById('ob-no-data');
+        if (noDataCb) noDataCb.checked = false;
+        document.querySelectorAll('.ob-quarter-input').forEach(inp => { inp.disabled = false; inp.value = ''; });
+        if (typeof rebuildPlot === 'function') rebuildPlot(allSectors);
+        obGoStep(1);
+        _modal().show();
+    };
+
+    // ── Apply guided mode ─────────────────────────────────────────────────────
+
+    function _applyGuidedMode(saved) {
+        if (!saved || !saved.fullData) return;
+        const fd = saved.fullData;
+
+        // ── 1. Populate the existing company panel ────────────────────────────
+        if (saved.companyName) document.getElementById('companyName').value = saved.companyName;
+        if (typeof showCompanyResult === 'function') showCompanyResult(fd);
+        document.getElementById('clearCompanyBtn').style.display = 'inline-flex';
+
+        // ── 2. Filter the sector chart (lowest-level first, like applyCompanyFilter) ──
+        if (typeof applyCompanyFilter === 'function') applyCompanyFilter(fd);
+
+        // ── 3. Expose own quarterly data to rebuildPlot ───────────────────────
+        window._obOwnData = (saved.quarters && saved.quarters.length > 0) ? saved.quarters : null;
+        if (typeof rebuildPlot === 'function') {
+            const checkboxes = document.querySelectorAll('.sector-checkbox');
+            const checked = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+            rebuildPlot(checked.length > 0 ? checked : allSectors);
+        }
+
+        // ── 4. Show compare section with loading state ────────────────────────
+        document.getElementById('compareSection').style.display = 'block';
+        document.getElementById('compareLoading').style.display = 'block';
+        document.getElementById('compareResult').style.display = 'none';
+        document.getElementById('compareAnalysisLoading').style.display = 'block';
+        document.getElementById('compareAnalysisResult').style.display = 'none';
+        document.getElementById('compareAnalysisError').style.display = 'none';
+
+        // ── 5. Fetch personalised comparison ─────────────────────────────────
+        fetch('/api/compare', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sector_levels: {
+                    bedrijfssector: fd.bedrijfssector || null,
+                    bedrijfstak:    fd.bedrijfstak    || null,
+                    bedrijfsklasse: fd.bedrijfsklasse || null,
+                },
+                own_quarters: saved.quarters || [],
+            }),
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('compareLoading').style.display = 'none';
+            document.getElementById('compareResult').style.display = 'block';
+            document.getElementById('compareAnalysisLoading').style.display = 'none';
+
+            if (data.error) {
+                document.getElementById('compareAnalysisError').textContent = data.error;
+                document.getElementById('compareAnalysisError').style.display = 'block';
+                document.getElementById('cmpTableBody').innerHTML = '<tr><td colspan="4" class="text-muted small text-center">–</td></tr>';
+                return;
+            }
+
+            const fmtPct = v => (v != null && !isNaN(v)) ? Number(v).toFixed(1) + '%' : '–';
+            const forecastTag = '<sup title="Prognose" class="text-primary ms-1" style="font-size:.65em;opacity:.8;">&#9670;</sup>';
+            const fmtRef = (v, isForecast) => {
+                if (v == null || isNaN(v)) return '–';
+                return Number(v).toFixed(1) + '%' + (isForecast ? forecastTag : '');
+            };
+            const diffSpan = (own, ref) => {
+                if (own == null || ref == null || isNaN(own) || isNaN(ref)) return '';
+                const d = own - ref;
+                if (Math.abs(d) < 0.05) return '<span class="text-secondary small ms-1">~0</span>';
+                const sign = d > 0 ? '+' : '';
+                const cls  = d < 0 ? 'text-success' : 'text-danger';
+                return `<span class="${cls} small ms-1">${sign}${d.toFixed(1)}%p</span>`;
+            };
+
+            const tbody = document.getElementById('cmpTableBody');
+            tbody.innerHTML = '';
+            let hasOwnData = false;
+            let hasForecast = false;
+            if (data.per_quarter && data.per_quarter.length > 0) {
+                data.per_quarter.forEach(row => {
+                    if (row.own_value != null) hasOwnData = true;
+                    if (row.sector_is_forecast || row.national_is_forecast) hasForecast = true;
+                    tbody.innerHTML += `<tr>
+                        <td class="text-muted small">${row.label}</td>
+                        <td>${fmtPct(row.own_value)}</td>
+                        <td>${fmtRef(row.sector_value, row.sector_is_forecast)}${diffSpan(row.own_value, row.sector_value)}</td>
+                        <td>${fmtRef(row.national_value, row.national_is_forecast)}${diffSpan(row.own_value, row.national_value)}</td>
+                    </tr>`;
+                });
+                if (hasForecast) {
+                    tbody.innerHTML += `<tr><td colspan="4" class="text-muted" style="font-size:.72rem;border-top:none;padding-top:0;">
+                        ${forecastTag} Prognosewaarde (nog geen CBS-meting beschikbaar)
+                    </td></tr>`;
+                }
+            } else {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted small text-center">Geen kwartaaldata beschikbaar.</td></tr>';
+            }
+            document.getElementById('compareNoData').style.display = hasOwnData ? 'none' : 'block';
+
+            document.getElementById('compareAnalysisResult').style.display = 'block';
+            document.getElementById('compareAnalysisText').textContent = data.analysis || '';
+            if (data.forecast) {
+                document.getElementById('compareAnalysisForecast').textContent = data.forecast;
+                document.getElementById('compareAnalysisForecastWrap').style.display = 'block';
+            }
+        })
+        .catch(err => {
+            document.getElementById('compareLoading').style.display = 'none';
+            document.getElementById('compareAnalysisLoading').style.display = 'none';
+            document.getElementById('compareResult').style.display = 'block';
+            document.getElementById('compareAnalysisError').textContent = 'Fout: ' + (err && err.message ? err.message : 'Verbindingsfout. Probeer later opnieuw.');
+            document.getElementById('compareAnalysisError').style.display = 'block';
+        });
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const done = localStorage.getItem(LS_KEY);
+        if (!done) {
+            _modal().show();
+        } else if (done === 'explore') {
+            document.getElementById('obOpenBtn').style.display = 'inline-flex';
+        } else if (done === 'guided') {
+            try {
+                const saved = JSON.parse(localStorage.getItem(LS_DATA) || '{}');
+                if (saved.fullData) _applyGuidedMode(saved);
+                else { localStorage.removeItem(LS_KEY); _modal().show(); }
+            } catch (e) { localStorage.removeItem(LS_KEY); _modal().show(); }
+        }
+    });
+
 }());
 </script>
 {% endblock %}

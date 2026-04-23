@@ -253,6 +253,31 @@ function rebuildPlot(selectedSectors) {
         }
     });
 
+    // Add own organisation trace (from guided onboarding)
+    if (window._obOwnData && window._obOwnData.length > 0) {
+        const ownX = [], ownY = [];
+        window._obOwnData.forEach(q => {
+            if (q.value != null && !isNaN(q.value)) {
+                // Convert "2024 Q3" → "2024-Q3" to match chart x-axis format
+                ownX.push(q.label.replace(' ', '-'));
+                ownY.push(q.value);
+            }
+        });
+        if (ownX.length > 0) {
+            traces.push({
+                x: ownX,
+                y: ownY,
+                mode: 'lines+markers',
+                name: 'Jouw organisatie',
+                type: 'scatter',
+                line: { color: '#dc3545', width: 3, dash: 'dashdot' },
+                marker: { color: '#dc3545', size: 8, symbol: 'diamond' },
+                hoverlabel: { bgcolor: '#dc3545', font: { color: '#ffffff' } },
+                hovertemplate: '<b>Jouw organisatie</b><br>%{x}<br>%{y:.2f}%<extra></extra>'
+            });
+        }
+    }
+
     const isMobile = window.innerWidth < 768;
     const layout = {
         title: isMobile ? 'Verzuim per sector' : 'Ziekteverzuimpercentage per sector over tijd',
