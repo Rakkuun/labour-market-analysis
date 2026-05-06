@@ -10,7 +10,7 @@ from openai import OpenAI
 load_dotenv()
 
 _DEEPSEEK_BASE_URL = 'https://api.deepseek.com'
-_DEEPSEEK_MODEL = 'deepseek-chat'
+_DEEPSEEK_MODEL = 'deepseek-v4-flash'
 
 
 def _get_client():
