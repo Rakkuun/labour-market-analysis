@@ -2,20 +2,21 @@
 {% block title %}peil.ai | Home{% endblock %}
 
 {% block content %}
-<div class="container-lg py-5">
 
-    <!-- Hero -->
-    <div class="row mb-5 align-items-center g-4">
-        <div class="col-lg-6">
-            <p class="text-primary fw-semibold mb-2 small text-uppercase letter-spacing-1">peil.ai | People Analytics Context Tools</p>
-            <h1 class="display-5 fw-bold mb-3" style="color:#212529;">People Insights betekenen meer zodra je de context begrijpt</h1>
-            <p class="lead text-muted mb-4">De eerste Nederlandse self-service, open source toolkit voor People Analytics &amp; HR professionals. Vergelijk jouw HR data direct met actuele CBS-, UWV- en sectorcijfers.</p>
-            <a href="/tools" class="btn btn-primary btn-lg px-4">
-                <i class="bi bi-grid me-2"></i>Bekijk alle tools 
-            </a>
-        </div>
-        <div class="col-lg-6">
-            <div class="hero-chart-card p-3">
+<!-- Hero (full-width) -->
+<section class="hero-section">
+    <div class="container-lg">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <p class="hero-label">peil.ai &middot; People Analytics Context Tools</p>
+                <h1 class="display-5 fw-bold mb-3 text-white">People Insights betekenen meer zodra je de context begrijpt</h1>
+                <p class="hero-lead mb-4">De eerste Nederlandse self-service, open source toolkit voor People Analytics &amp; HR professionals. Vergelijk jouw HR data direct met actuele CBS-, UWV- en sectorcijfers.</p>
+                <a href="/tools" class="btn btn-light btn-lg px-4 fw-semibold">
+                    <i class="bi bi-grid me-2 text-primary"></i>Bekijk alle tools
+                </a>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-chart-card p-3">
                 <div class="d-flex justify-content-between align-items-start mb-1">
                     <div>
                         <span class="fw-semibold text-dark" style="font-size:.9rem;">Ziekteverzuim sector G Handel</span>
@@ -35,32 +36,35 @@
             </div>
         </div>
     </div>
+</section>
+
+<div class="container-lg py-5">
 
     <!-- Value propositions -->
     <div class="row g-4 mb-5">
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="stat-card stat-card--blue">
                 <div class="stat-icon"><i class="bi bi-bar-chart-line"></i></div>
                 <div class="stat-value">Context</div>
                 <div class="stat-label">Is 12% verloop hoog in jouw sector? Je ziet het direct</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="stat-card stat-card--green">
                 <div class="stat-icon"><i class="bi bi-database"></i></div>
                 <div class="stat-value">Eén plek</div>
                 <div class="stat-label">CBS, UWV, AWVN en RIVM — externe data samengevoegd</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="stat-card stat-card--amber">
                 <div class="stat-icon"><i class="bi bi-shield-check"></i></div>
                 <div class="stat-value">Privacyproof</div>
                 <div class="stat-label">Jouw bedrijfsdata wordt nergens opgeslagen</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="stat-card">
+            <div class="stat-card stat-card--purple">
                 <div class="stat-icon"><i class="bi bi-cpu"></i></div>
                 <div class="stat-value">AI & DS</div>
                 <div class="stat-label">Prognoses en patronen met actuele analysetechnieken</div>
@@ -69,7 +73,7 @@
     </div>
 
     <!-- Tool cards -->
-    <h2 class="h4 fw-bold mb-4" style="color:#212529;">Beschikbare tools</h2>
+    <h2 class="h4 fw-bold mb-4 section-heading">Beschikbare tools</h2>
     <div class="row g-4 mb-5">
         <div class="col-md-6 col-lg-4">
             <a href="/tools/ziekteverzuim" class="tool-card-link text-decoration-none">
@@ -105,7 +109,7 @@
     </div>
 
     <!-- Kennisbank -->
-    <h2 class="h4 fw-bold mb-4" style="color:#212529;">Kennisbank</h2>
+    <h2 class="h4 fw-bold mb-4 section-heading">Kennisbank</h2>
     <div class="row g-4">
         <div class="col-md-6 col-lg-4">
             <a href="/kennisbank" class="tool-card-link text-decoration-none">

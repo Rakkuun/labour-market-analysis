@@ -98,13 +98,13 @@
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 body {
-    background-color: #f8f9fa;
+    background-color: #f0f4f8;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .navbar-custom {
-    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .navbar-custom .navbar-brand {
@@ -142,12 +142,33 @@ body {
     padding-left: calc(1rem - 3px);
 }
 
+/* ── Hero section ─────────────────────────────────────────────────────────── */
+.hero-section {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a4abf 60%, #06378f 100%);
+    padding: 4rem 0 3.5rem;
+}
+
+.hero-label {
+    font-size: .8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255,255,255,.7);
+    margin-bottom: .5rem;
+}
+
+.hero-lead {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,.88);
+    line-height: 1.6;
+}
+
 /* ── Hero preview chart card ─────────────────────────────────────────────── */
 .hero-chart-card {
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 12px rgba(13, 110, 253, 0.1);
-    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    border: none;
 }
 
 /* ── Stat cards (homepage) ────────────────────────────────────────────────── */
@@ -181,6 +202,15 @@ body {
     letter-spacing: 0.04em;
     color: #6c757d;
 }
+
+.stat-card.stat-card--blue   { background: #eff6ff; border-top: 3px solid #3b82f6; }
+.stat-card.stat-card--blue   .stat-icon { color: #3b82f6; }
+.stat-card.stat-card--green  { background: #f0fdf4; border-top: 3px solid #10b981; }
+.stat-card.stat-card--green  .stat-icon { color: #10b981; }
+.stat-card.stat-card--amber  { background: #fffbeb; border-top: 3px solid #f59e0b; }
+.stat-card.stat-card--amber  .stat-icon { color: #f59e0b; }
+.stat-card.stat-card--purple { background: #faf5ff; border-top: 3px solid #8b5cf6; }
+.stat-card.stat-card--purple .stat-icon { color: #8b5cf6; }
 
 /* ── Tool cards ───────────────────────────────────────────────────────────── */
 .tool-card {
@@ -229,6 +259,12 @@ body {
     font-size: 0.875rem;
     font-weight: 600;
     color: #0d6efd;
+}
+
+.section-heading {
+    border-left: 4px solid #0d6efd;
+    padding-left: 0.75rem;
+    color: #212529;
 }
 
 
