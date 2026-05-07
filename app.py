@@ -11,7 +11,7 @@ from flask_caching import Cache
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
-from ai import analyze_with_ai, chat_with_agent, compare_with_ai, lookup_company_info
+from ai import analyze_with_ai, chat_with_agent, compare_with_ai, lookup_company_info, role_demo_query, _ROLE_PERMISSIONS
 from chart import create_hero_preview_figure
 from context import prepare_context
 from db import (build_sector_data, get_api_usage_stats, get_refresh_log,
@@ -306,6 +306,51 @@ def admin_refresh():
     if source not in ('cbs', 'flu'):
         return jsonify({'error': 'Ongeldige bron. Gebruik "cbs" of "flu".'}), 400
     return jsonify(run_refresh(source))
+
+
+# ── Kennisbank ────────────────────────────────────────────────────────────────
+@app.route('/ai-en-hr')
+def ai_en_hr_redirect():
+    from flask import redirect
+    return redirect('/kennisbank', code=301)
+
+
+@app.route('/kennisbank')
+def kennisbank():
+    return render_template('kennisbank.html', active_page='kennisbank')
+
+
+@app.route('/kennisbank/ai-people-analytics')
+def kennisbank_pa():
+    return render_template('kennisbank_pa.html', active_page='kennisbank')
+
+
+@app.route('/kennisbank/ai-hoe-werkt-het')
+def kennisbank_tech():
+    return render_template('kennisbank_tech.html', active_page='kennisbank')
+
+
+@app.route('/kennisbank/ai-data-security')
+def kennisbank_security():
+    return render_template('kennisbank_security.html', active_page='kennisbank',
+                           roles=_ROLE_PERMISSIONS)
+
+
+@app.route('/api/role-demo', methods=['POST'])
+@limiter.limit('20 per minute; 100 per hour')
+def api_role_demo():
+    try:
+        data = request.json or {}
+        role = (data.get('role') or '').strip()
+        question = (data.get('question') or '').strip()
+        if not role or not question:
+            return jsonify({'error': 'Rol en vraag zijn verplicht.'}), 400
+        if len(question) > 300:
+            return jsonify({'error': 'Vraag te lang (max 300 tekens).'}), 400
+        return jsonify(role_demo_query(role, question))
+    except Exception:
+        logger.exception('Fout in /api/role-demo')
+        return jsonify({'error': 'Er is een interne fout opgetreden.'}), 500
 
 
 # ── Health ────────────────────────────────────────────────────────────────────

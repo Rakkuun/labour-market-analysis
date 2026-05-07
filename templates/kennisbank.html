@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Kennisbank | peil.ai{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">Kennisbank</li>
+        </ol>
+    </nav>
+
+    <div class="row mb-5">
+        <div class="col-lg-7">
+            <p class="text-primary fw-semibold mb-2 small text-uppercase">Thought leadership</p>
+            <h1 class="display-6 fw-bold mb-3" style="color:#212529;">Kennisbank</h1>
+            <p class="lead text-muted mb-0">Praktische artikelen over AI in het People Analytics domein — wat werkt, hoe het werkt, en wat je moet weten over privacy en security.</p>
+        </div>
+    </div>
+
+    <!-- Serie: AI voor People Analytics -->
+    <div class="mb-2">
+        <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2" style="font-size:.8rem; border-radius:20px;">
+            <i class="bi bi-collection me-1"></i>Serie: AI voor People Analytics
+        </span>
+    </div>
+    <p class="text-muted small mb-4">Drie artikelen over hoe AI past in het werk van een People Analytics professional — van mogelijkheden tot techniek tot veiligheid.</p>
+
+    <div class="row g-4 mb-6">
+
+        <!-- Artikel 1 -->
+        <div class="col-md-4">
+            <a href="/kennisbank/ai-people-analytics" class="text-decoration-none">
+                <div class="kb-card h-100">
+                    <div class="kb-card-label">Artikel 1 van 3</div>
+                    <div class="kb-card-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-lightbulb"></i>
+                    </div>
+                    <h5 class="kb-card-title">Wat kan AI wel en niet voor People Analytics?</h5>
+                    <p class="kb-card-text">Concrete use cases — van verzuimanalyse tot workforce planning — én een eerlijk overzicht van wat AI niet kan. Want een AI kent jouw organisatie niet; jij wel.</p>
+                    <div class="kb-card-meta">
+                        <span><i class="bi bi-clock me-1"></i>5 min leestijd</span>
+                        <span class="kb-card-cta">Lees artikel <i class="bi bi-arrow-right ms-1"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Artikel 2 -->
+        <div class="col-md-4">
+            <a href="/kennisbank/ai-hoe-werkt-het" class="text-decoration-none">
+                <div class="kb-card h-100">
+                    <div class="kb-card-label">Artikel 2 van 3</div>
+                    <div class="kb-card-icon bg-warning-subtle text-warning">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                    <h5 class="kb-card-title">Hoe werkt AI met HR-data technisch?</h5>
+                    <p class="kb-card-text">Data moet klaarstaan voordat AI iets kan. Je prompt voor tekst-analyse, niet voor de analyse zelf. Zo werkt de pipeline van ruwe data naar bruikbaar inzicht.</p>
+                    <div class="kb-card-meta">
+                        <span><i class="bi bi-clock me-1"></i>6 min leestijd</span>
+                        <span class="kb-card-cta">Lees artikel <i class="bi bi-arrow-right ms-1"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Artikel 3 -->
+        <div class="col-md-4">
+            <a href="/kennisbank/ai-data-security" class="text-decoration-none">
+                <div class="kb-card h-100">
+                    <div class="kb-card-label">Artikel 3 van 3</div>
+                    <div class="kb-card-icon bg-danger-subtle text-danger">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h5 class="kb-card-title">Data security bij AI met HR-data</h5>
+                    <p class="kb-card-text">Wat is prompt injection en hoe voorkom je het? Wat zet je nooit in een AI-prompt? En hoe werkt rolgebaseerde toegangscontrole in de praktijk?</p>
+                    <div class="kb-card-meta">
+                        <span><i class="bi bi-clock me-1"></i>7 min leestijd</span>
+                        <span class="kb-card-cta">Lees artikel <i class="bi bi-arrow-right ms-1"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Over de auteur -->
+    <div class="card border-0 bg-light rounded-3 p-4" style="max-width:600px;">
+        <div class="d-flex align-items-start gap-3">
+            <div class="flex-shrink-0">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+                     style="width:44px;height:44px;font-size:1rem;">S</div>
+            </div>
+            <div>
+                <div class="fw-semibold mb-1">Sander ten Kate</div>
+                <div class="small text-muted mb-1">
+                    <span class="fw-semibold text-dark">Head of People Analytics, Data & AI</span> bij Lidl<br>
+                    <span class="text-muted">Former Head of People Analytics & Data bij Coolblue</span>
+                </div>
+                <p class="small text-muted mb-2 mt-1">Ik bouw tools en inzichten die HR-data begrijpelijk maken — voor professionals die willen weten wat er werkelijk speelt in hun organisatie.</p>
+                <a href="https://www.linkedin.com/in/sander-ten-kate-b220215a/" target="_blank" rel="noopener"
+                   class="small text-primary text-decoration-none">
+                    <i class="bi bi-linkedin me-1"></i>LinkedIn
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<style>
+.mb-6 { margin-bottom: 4rem; }
+
+.kb-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.75rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    border: 1px solid #f0f0f0;
+    transition: box-shadow .15s, transform .15s;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+}
+.kb-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,.12);
+    transform: translateY(-2px);
+}
+.kb-card-label {
+    font-size: .72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #6c757d;
+}
+.kb-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.kb-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+    line-height: 1.3;
+}
+.kb-card-text {
+    font-size: .875rem;
+    color: #6c757d;
+    margin: 0;
+    flex-grow: 1;
+    line-height: 1.6;
+}
+.kb-card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: .78rem;
+    color: #6c757d;
+    margin-top: auto;
+    padding-top: .5rem;
+    border-top: 1px solid #f0f0f0;
+}
+.kb-card-cta {
+    color: #0d6efd;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

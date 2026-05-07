@@ -1,0 +1,455 @@
+{% extends "base.html" %}
+{% block title %}AI & HR data | peil.ai{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item active">AI & HR data</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <p class="text-primary fw-semibold mb-2 small text-uppercase">Kennisartikel</p>
+            <h1 class="display-6 fw-bold mb-3" style="color:#212529;">Hoe werkt AI met HR data?</h1>
+            <p class="lead text-muted">Van ruwe personeelsdata tot bruikbaar inzicht — en waarom toegangscontrole daarin cruciaal is.</p>
+        </div>
+    </div>
+
+    <!-- ── Sectie 1: Van ruwe data naar inzicht ──────────────────────────── -->
+    <section class="mb-6" id="pipeline">
+        <h2 class="h3 fw-bold mb-1" style="color:#212529;">1. Van ruwe data naar inzicht</h2>
+        <p class="text-muted mb-4">HR-systemen bevatten veel data, maar die is zelden direct bruikbaar voor AI. Elke stap in de pipeline heeft een doel.</p>
+
+        <!-- Pipeline visual -->
+        <div class="pipeline-steps mb-4">
+            <div class="pipeline-step">
+                <div class="pipeline-step-icon bg-primary-subtle text-primary"><i class="bi bi-table"></i></div>
+                <div class="pipeline-step-body">
+                    <div class="fw-semibold">Ruwe brondata</div>
+                    <div class="text-muted small">Registratiesystemen, HR-tools, externe bronnen (CBS, UWV). Inconsistent, onvolledig, gevoelig.</div>
+                </div>
+            </div>
+            <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+            <div class="pipeline-step">
+                <div class="pipeline-step-icon bg-warning-subtle text-warning"><i class="bi bi-funnel"></i></div>
+                <div class="pipeline-step-body">
+                    <div class="fw-semibold">Cleaning & aggregatie</div>
+                    <div class="text-muted small">Verwijder nulls, normaliseer kolommen, aggregeer naar groepsniveau zodat individuen niet herleidbaar zijn.</div>
+                </div>
+            </div>
+            <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+            <div class="pipeline-step">
+                <div class="pipeline-step-icon bg-success-subtle text-success"><i class="bi bi-bookmarks"></i></div>
+                <div class="pipeline-step-body">
+                    <div class="fw-semibold">Context toevoegen</div>
+                    <div class="text-muted small">Koppel externe benchmarks (sectorgemiddelden, griepdata). Geef de AI het kader om betekenis te geven aan getallen.</div>
+                </div>
+            </div>
+            <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+            <div class="pipeline-step">
+                <div class="pipeline-step-icon bg-info-subtle text-info"><i class="bi bi-cpu"></i></div>
+                <div class="pipeline-step-body">
+                    <div class="fw-semibold">AI-analyse</div>
+                    <div class="text-muted small">Gestructureerde prompt naar het taalmodel. De AI ziet geen ruwe data, maar een gecontroleerd datakader.</div>
+                </div>
+            </div>
+            <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+            <div class="pipeline-step">
+                <div class="pipeline-step-icon bg-primary-subtle text-primary"><i class="bi bi-chat-text"></i></div>
+                <div class="pipeline-step-body">
+                    <div class="fw-semibold">Gefilterd antwoord</div>
+                    <div class="text-muted small">Het antwoord wordt gecontroleerd op rolbevoegdheid en privacyregels vóór het de gebruiker bereikt.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Raw data voorbeeld -->
+        <div class="row g-4 align-items-start">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header fw-semibold text-danger-emphasis bg-danger-subtle border-0">
+                        <i class="bi bi-x-circle me-2"></i>Ruwe HR-data — niet geschikt voor AI
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0 small font-monospace">
+                                <thead class="table-light">
+                                    <tr><th>medewerker_id</th><th>naam</th><th>afd</th><th>verzuim_dagen</th><th>reden</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>1042</td><td>J. de Vries</td><td>IT</td><td>12</td><td>psychisch</td></tr>
+                                    <tr><td>1043</td><td>A. Bakker</td><td>IT</td><td></td><td class="text-muted fst-italic">null</td></tr>
+                                    <tr><td>1044</td><td>S. Jansen</td><td>OPS</td><td>3</td><td>fysiek</td></tr>
+                                    <tr><td>1045</td><td>M. Peters</td><td>IT</td><td>0</td><td></td></tr>
+                                    <tr><td>1046</td><td>K. Smit</td><td>OPS</td><td>45</td><td>burn-out</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer small text-danger bg-danger-subtle border-0">
+                        Herleidbaar tot individuen · ontbrekende waarden · diagnose-informatie
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header fw-semibold text-success-emphasis bg-success-subtle border-0">
+                        <i class="bi bi-check-circle me-2"></i>Na aggregatie — veilig voor AI
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0 small font-monospace">
+                                <thead class="table-light">
+                                    <tr><th>afdeling</th><th>n</th><th>verzuim_%</th><th>trend</th><th>sector_avg_%</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>IT</td><td>28</td><td>2.1</td><td>dalend</td><td>4.1</td></tr>
+                                    <tr><td>Operations</td><td>45</td><td>6.8</td><td>stijgend</td><td>4.1</td></tr>
+                                    <tr><td>Sales</td><td>19</td><td>4.5</td><td>stabiel</td><td>4.1</td></tr>
+                                    <tr><td>Finance</td><td>12</td><td>3.2</td><td>stabiel</td><td>4.1</td></tr>
+                                    <tr><td class="text-muted fst-italic" colspan="5">HR (n=4): geanonimiseerd</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer small text-success bg-success-subtle border-0">
+                        Geen individuen · compleet · CBS-benchmark toegevoegd
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5">
+
+    <!-- ── Sectie 2: Wat gaat er in, wat komt er uit ─────────────────────── -->
+    <section class="mb-6" id="prompt">
+        <h2 class="h3 fw-bold mb-1" style="color:#212529;">2. Wat gaat er in, wat komt er uit</h2>
+        <p class="text-muted mb-4">Een AI-taalmodel leest geen database. Het krijgt een tekstuele prompt met gestructureerde context. Zo ziet dat eruit in deze applicatie.</p>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header fw-semibold bg-light border-0">
+                        <i class="bi bi-arrow-up-circle text-primary me-2"></i>De prompt (input)
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-dark text-light rounded p-3 small mb-0" style="white-space:pre-wrap;font-size:.78rem;">Je bent een arbeidsmarktanalist.
+
+SECTOR: G Handel
+SECTORGEMIDDELDE (laatste 4 kwartalen): 4.1%
+NATIONAAL GEMIDDELDE: 4.4%
+RECENTE TREND: [{"kwartaal":"2024-Q3","waarde":4.0}, ...]
+
+EIGEN ORGANISATIE:
+- Gemiddeld verzuim: 5.2%
+- Verschil t.o.v. sector: +1.1%
+
+Geef een analyse in 2-3 zinnen en een
+aanbeveling voor de komende kwartalen.</pre>
+                    </div>
+                    <div class="card-footer small text-muted bg-light border-0">
+                        Geen namen, geen individuen — alleen geaggregeerde feiten + context
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header fw-semibold bg-light border-0">
+                        <i class="bi bi-arrow-down-circle text-success me-2"></i>Het antwoord (output)
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted mb-2 fw-semibold">Analyse:</p>
+                        <p class="small mb-3">Jouw organisatie scoort met 5,2% verzuim ruim boven het sectorgemiddelde van 4,1% in de Handel. Het verschil van 1,1 procentpunt is significant en verdient aandacht, zeker omdat de sectorbrede trend licht dalend is terwijl jullie cijfer stabiel hoog blijft.</p>
+                        <p class="small text-muted mb-2 fw-semibold">Aanbeveling:</p>
+                        <p class="small mb-0">Gezien de stijgende sectorprognose voor Q1 (seizoenspatroon) is het verstandig nu preventieve maatregelen te nemen. Een verzuimgesprek met leidinggevenden in de hoogste afdelingen en aandacht voor werkdruk na het Q4-piekseizoen kunnen het verschil maken.</p>
+                    </div>
+                    <div class="card-footer small text-muted bg-light border-0">
+                        Specifiek, contextgebonden — niet generiek advies
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="alert alert-info border-0 mt-3 small">
+            <i class="bi bi-lightbulb me-2"></i>
+            <strong>Waarom dit beter werkt dan "plak je data in ChatGPT":</strong> de AI krijgt een gecontroleerd, geanonimiseerd datakader met externe benchmarks. Het antwoord is daardoor specifiek, verifieerbaar en privacyproof — in plaats van een generieke uitleg.
+        </div>
+    </section>
+
+    <hr class="my-5">
+
+    <!-- ── Sectie 3: Probeer het zelf ───────────────────────────────────────── -->
+    <section class="mb-6" id="demo-chat">
+        <h2 class="h3 fw-bold mb-1" style="color:#212529;">3. Probeer het zelf</h2>
+        <p class="text-muted mb-4">Stel een vraag over Nederlands ziekteverzuim. De AI antwoordt op basis van echte CBS-data (1996–2025, 39 sectoren).</p>
+
+        <div class="card border-0 shadow-sm" style="max-width:700px;">
+            <div class="card-body">
+                <div id="demo-chat-messages" class="mb-3" style="min-height:60px;"></div>
+                <div class="input-group">
+                    <input type="text" id="demo-chat-input" class="form-control"
+                           placeholder="Bijv: Welke sector heeft het hoogste verzuim?"
+                           maxlength="300">
+                    <button class="btn btn-primary" id="demo-chat-send" onclick="sendDemoChat()">
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <button class="btn btn-outline-secondary btn-sm suggestion-btn" onclick="setDemoQ(this)">Welke sector heeft het hoogste verzuim?</button>
+                    <button class="btn btn-outline-secondary btn-sm suggestion-btn" onclick="setDemoQ(this)">Is verzuim gestegen na corona?</button>
+                    <button class="btn btn-outline-secondary btn-sm suggestion-btn" onclick="setDemoQ(this)">Wat verwacht je voor Q3 2026?</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5">
+
+    <!-- ── Sectie 4: Toegangscontrole demo ──────────────────────────────────── -->
+    <section class="mb-6" id="demo-rollen">
+        <h2 class="h3 fw-bold mb-1" style="color:#212529;">4. Toegangscontrole: wie mag wat zien?</h2>
+        <p class="text-muted mb-3">In HR geldt: niet iedereen mag dezelfde data inzien. Een goed AI-systeem past toegangsregels toe <em>vóór</em> het antwoord de gebruiker bereikt — niet achteraf.</p>
+
+        <div class="alert alert-secondary border-0 small mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Onderstaande demo gebruikt <strong>fictieve data</strong> van DemoOrg B.V. Stel dezelfde vraag vanuit verschillende rollen en zie hoe het antwoord — en de beschikbare data — per rol verschilt.
+        </div>
+
+        <!-- Role selector -->
+        <div class="row g-3 mb-4">
+            {% for role_key, role in roles.items() %}
+            <div class="col-6 col-md-3">
+                <button class="role-btn w-100 h-100 {% if loop.first %}active{% endif %}"
+                        data-role="{{ role_key }}" onclick="selectRole(this)">
+                    <i class="bi {{ role.icon }} fs-4 text-primary mb-2 d-block"></i>
+                    <strong class="d-block mb-1 small">{{ role.label }}</strong>
+                    <span class="text-muted" style="font-size:.75rem;">{{ role.description }}</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Question input -->
+        <div class="card border-0 shadow-sm mb-3" style="max-width:700px;">
+            <div class="card-body">
+                <label class="form-label fw-semibold small">Stel een vraag als deze medewerker:</label>
+                <div class="input-group">
+                    <input type="text" id="role-question" class="form-control"
+                           value="Wat is het ziekteverzuim in mijn organisatie?"
+                           maxlength="300">
+                    <button class="btn btn-primary" onclick="sendRoleDemo()">
+                        <i class="bi bi-send me-1"></i>Verstuur
+                    </button>
+                </div>
+                <div class="d-flex flex-wrap gap-2 mt-2">
+                    <button class="btn btn-outline-secondary btn-sm suggestion-btn" onclick="setRoleQ(this)">Wat is het ziekteverzuim in mijn organisatie?</button>
+                    <button class="btn btn-outline-secondary btn-sm suggestion-btn" onclick="setRoleQ(this)">Welke afdeling heeft het hoogste verzuim?</button>
+                    <button class="btn btn-outline-secondary btn-sm suggestion-btn" onclick="setRoleQ(this)">Wat is het verzuim van individuele medewerkers?</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Result area -->
+        <div id="role-result" style="display:none; max-width:700px;">
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-header fw-semibold bg-light border-0 small">
+                    <i class="bi bi-shield-check text-success me-2"></i>Toegangscontrole toegepast
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-1" id="role-access-label"></p>
+                    <p class="mb-0" id="role-answer"></p>
+                </div>
+            </div>
+            <div class="mb-2">
+                <button class="btn btn-outline-secondary btn-sm" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#promptCollapse">
+                    <i class="bi bi-code-slash me-1"></i>Toon de prompt die naar de AI is gestuurd
+                </button>
+            </div>
+            <div class="collapse" id="promptCollapse">
+                <pre id="role-prompt-preview" class="bg-dark text-light rounded p-3 small"
+                     style="white-space:pre-wrap;font-size:.75rem;max-height:300px;overflow-y:auto;"></pre>
+            </div>
+        </div>
+
+        <div id="role-loading" style="display:none;" class="text-muted small">
+            <span class="loading-spinner">
+                <span class="spinner-dots"><span></span><span></span><span></span></span>
+                AI verwerkt de vraag…
+            </span>
+        </div>
+        <div id="role-error" class="text-danger small mt-2" style="display:none;"></div>
+    </section>
+
+</div>
+
+<style>
+.mb-6 { margin-bottom: 4rem; }
+
+/* Pipeline */
+.pipeline-steps {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: .5rem;
+}
+.pipeline-step {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    padding: .9rem 1rem;
+    flex: 1 1 160px;
+    min-width: 140px;
+}
+.pipeline-step-icon {
+    font-size: 1.4rem;
+    border-radius: 8px;
+    padding: .4rem .5rem;
+    flex-shrink: 0;
+}
+.pipeline-arrow {
+    align-self: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+@media (max-width: 767px) {
+    .pipeline-arrow { display: none; }
+}
+
+/* Role buttons */
+.role-btn {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem .75rem;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s, background .15s;
+    color: inherit;
+}
+.role-btn:hover {
+    border-color: #0d6efd;
+    background: #f0f5ff;
+}
+.role-btn.active {
+    border-color: #0d6efd;
+    background: #e8f0fe;
+    box-shadow: 0 0 0 3px rgba(13,110,253,.1);
+}
+</style>
+
+<script>
+// ── Sectie 3: demo chat ───────────────────────────────────────────────────────
+const chatHistory = [];
+
+function setDemoQ(btn) {
+    document.getElementById('demo-chat-input').value = btn.textContent.trim();
+}
+
+async function sendDemoChat() {
+    const input = document.getElementById('demo-chat-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    appendChatMsg('user', msg);
+
+    const thinkingId = appendChatMsg('assistant', '<span class="text-muted fst-italic">Even denken…</span>');
+    try {
+        chatHistory.push({ role: 'user', content: msg });
+        const r = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg, history: chatHistory.slice(-8) }),
+        });
+        const data = await r.json();
+        const reply = data.reply || data.error || 'Geen antwoord ontvangen.';
+        chatHistory.push({ role: 'assistant', content: reply });
+        document.getElementById(thinkingId).innerHTML = escHtml(reply);
+    } catch (e) {
+        document.getElementById(thinkingId).innerHTML = `<span class="text-danger">Fout: ${e}</span>`;
+    }
+}
+
+function appendChatMsg(role, html) {
+    const box = document.getElementById('demo-chat-messages');
+    const id = 'msg-' + Date.now();
+    const isUser = role === 'user';
+    box.insertAdjacentHTML('beforeend', `
+        <div class="d-flex ${isUser ? 'justify-content-end' : ''} mb-2">
+            <div class="rounded px-3 py-2 small ${isUser ? 'bg-primary text-white' : 'bg-white border'}"
+                 style="max-width:85%;" id="${id}">${html}</div>
+        </div>`);
+    box.scrollTop = box.scrollHeight;
+    return id;
+}
+
+document.getElementById('demo-chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendDemoChat();
+});
+
+// ── Sectie 4: role demo ───────────────────────────────────────────────────────
+let selectedRole = '{{ roles.keys()|list|first }}';
+
+function selectRole(btn) {
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedRole = btn.dataset.role;
+    // Reset result
+    document.getElementById('role-result').style.display = 'none';
+    document.getElementById('role-error').style.display = 'none';
+}
+
+function setRoleQ(btn) {
+    document.getElementById('role-question').value = btn.textContent.trim();
+}
+
+async function sendRoleDemo() {
+    const question = document.getElementById('role-question').value.trim();
+    if (!question) return;
+
+    document.getElementById('role-result').style.display = 'none';
+    document.getElementById('role-error').style.display = 'none';
+    document.getElementById('role-loading').style.display = 'block';
+
+    try {
+        const r = await fetch('/api/role-demo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: selectedRole, question }),
+        });
+        const data = await r.json();
+        document.getElementById('role-loading').style.display = 'none';
+
+        if (data.error) {
+            document.getElementById('role-error').textContent = data.error;
+            document.getElementById('role-error').style.display = 'block';
+            return;
+        }
+        document.getElementById('role-access-label').textContent = data.access_explanation;
+        document.getElementById('role-answer').textContent = data.answer;
+        document.getElementById('role-prompt-preview').textContent = data.prompt_preview;
+        document.getElementById('role-result').style.display = 'block';
+        // Collapse prompt preview on new result
+        const collapse = bootstrap.Collapse.getInstance(document.getElementById('promptCollapse'));
+        if (collapse) collapse.hide();
+    } catch (e) {
+        document.getElementById('role-loading').style.display = 'none';
+        document.getElementById('role-error').textContent = `Netwerkfout: ${e}`;
+        document.getElementById('role-error').style.display = 'block';
+    }
+}
+
+function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+{% endblock %}

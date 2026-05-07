@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+{% block title %}Wat kan AI voor People Analytics? | Kennisbank | peil.ai{% endblock %}
+
+{% block content %}
+<div class="container-lg py-5">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Home</a></li>
+            <li class="breadcrumb-item"><a href="/kennisbank">Kennisbank</a></li>
+            <li class="breadcrumb-item active">AI voor People Analytics</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-8">
+
+            <!-- Header -->
+            <div class="mb-5">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2" style="font-size:.75rem; border-radius:20px;">Artikel 1 van 3</span>
+                    <span class="text-muted small"><i class="bi bi-clock me-1"></i>5 min leestijd</span>
+                </div>
+                <h1 class="display-6 fw-bold mb-3" style="color:#212529;">Wat kan AI wel en niet voor People Analytics?</h1>
+                <p class="lead text-muted">AI is een krachtige tekstgenerator die werkt op getallen die jij aanlevert. Dat maakt het nuttig voor specifieke taken — maar het vervangt geen analytisch oordeel.</p>
+            </div>
+
+            <!-- Inleiding -->
+            <section class="article-section">
+                <p>De hype rondom AI wekt de indruk dat het overal antwoord op heeft. In de praktijk van People Analytics is dat genuanceerder. AI-taalmodellen zijn uitzonderlijk goed in één ding: tekst genereren op basis van een context die jij aanlevert. Dat is precies waarom ze nuttig zijn in PA — en ook waarom ze begrensd zijn.</p>
+                <p>De kern: <strong>de analyse zit in de data die jij aanlevert. De AI helpt je die analyse te verwoorden, te contextualiseren en toegankelijk te maken.</strong> Het rekenwerk, de datakwaliteit en het analytisch oordeel blijven jouw verantwoordelijkheid.</p>
+            </section>
+
+            <hr class="my-5">
+
+            <!-- Use cases -->
+            <section class="article-section">
+                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Wat AI wél kan</h2>
+                <p class="text-muted mb-4">Concrete toepassingen waarvoor AI in het People Analytics domein aantoonbaar waarde toevoegt.</p>
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-primary-subtle text-primary"><i class="bi bi-graph-up-arrow"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">Verzuimanalyse narratief</div>
+                                <p class="small text-muted mb-0">Jij levert verzuimpercentages per kwartaal en een sectorgemiddelde. AI schrijft een leesbare trendanalyse met duiding — in seconden, specifiek voor jouw organisatie.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-success-subtle text-success"><i class="bi bi-bar-chart-steps"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">Benchmark-vergelijking</div>
+                                <p class="small text-muted mb-0">Jouw organisatie versus CBS- of UWV-cijfers in begrijpelijke taal. AI benoemt het verschil, de richting en — op basis van historische data — een verwachting.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-warning-subtle text-warning"><i class="bi bi-people"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">Verlooppatronen beschrijven</div>
+                                <p class="small text-muted mb-0">Van een tabel met turnover per team of functiegroep naar een leesbaar overzicht voor het MT, inclusief signalering van afwijkende afdelingen.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-info-subtle text-info"><i class="bi bi-calendar3"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">Workforce planning scenario's</div>
+                                <p class="small text-muted mb-0">"Wat als we 10% meer FTE nodig hebben in Q3?" — AI vertaalt scenario-input naar een gestructureerde analyse van implicaties voor bezetting en kosten.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-primary-subtle text-primary"><i class="bi bi-file-text"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">MT-rapportages schrijven</div>
+                                <p class="small text-muted mb-0">Ruwe HR-metrics omzetten naar een leesbare managementsamenvatting. AI neemt het schrijfwerk over; jij valideert de inhoud en past de toon aan.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-success-subtle text-success"><i class="bi bi-chat-square-text"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">Conversational data-exploratie</div>
+                                <p class="small text-muted mb-0">Vragen stellen aan een dataset in gewone taal — zonder SQL. "Welke sector had de sterkste stijging na corona?" Als de data er is, geeft AI een antwoord.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-warning-subtle text-warning"><i class="bi bi-bell"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">Automatische signalering</div>
+                                <p class="small text-muted mb-0">Trends detecteren die buiten een drempelwaarde vallen of afwijken van het sectorgemiddelde — en daar een tekstueel signaal van maken dat direct door een manager te lezen is.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="usecase-card">
+                            <div class="usecase-icon bg-info-subtle text-info"><i class="bi bi-translate"></i></div>
+                            <div>
+                                <div class="fw-semibold mb-1">Vertaling voor niet-analisten</div>
+                                <p class="small text-muted mb-0">Statistische uitkomsten omzetten naar taal die begrijpelijk is voor HR-businesspartners, leidinggevenden of ondernemingsraden — zonder de nuance te verliezen.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="alert alert-success border-0 small">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <strong>Gemeenschappelijke noemer:</strong> bij al deze use cases lever jij de data en de context. AI schrijft de tekst. Het verschil met "gewoon ChatGPT gebruiken" is dat jij een gecontroleerd, geanonimiseerd datakader aanlevert — en dat het antwoord daardoor specifiek en verifieerbaar is.
+                </div>
+            </section>
+
+            <hr class="my-5">
+
+            <!-- Beperkingen -->
+            <section class="article-section">
+                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Wat AI niet kan</h2>
+                <p class="text-muted mb-4">Eerlijk zijn over beperkingen is even belangrijk als enthousiasme over mogelijkheden. Dit zijn de grenzen die ertoe doen.</p>
+
+                <div class="limitation-list">
+
+                    <div class="limitation-item">
+                        <div class="limitation-marker text-danger"><i class="bi bi-x-circle-fill"></i></div>
+                        <div>
+                            <div class="fw-semibold mb-1">Causaliteit begrijpen</div>
+                            <p class="small text-muted mb-0">AI kan zeggen "het verzuim steeg na Q2 2023" — maar <em>waarom</em> het steeg weet het niet. Dat vereist organisatiekennis: een reorganisatie, een leidinggevende die vertrok, een piekperiode in werkdruk. Die context zit niet in de data.</p>
+                        </div>
+                    </div>
+
+                    <div class="limitation-item">
+                        <div class="limitation-marker text-danger"><i class="bi bi-x-circle-fill"></i></div>
+                        <div>
+                            <div class="fw-semibold mb-1">Kleine groepen beoordelen</div>
+                            <p class="small text-muted mb-0">n=4 is statistisch niet betrouwbaar. Een stijging van 2% naar 6% in een team van vier mensen is één extra ziekmelding. AI herkent dit niet automatisch als ruis — jij moet dat kader aanleveren of het resultaat wantrouwen.</p>
+                        </div>
+                    </div>
+
+                    <div class="limitation-item">
+                        <div class="limitation-marker text-danger"><i class="bi bi-x-circle-fill"></i></div>
+                        <div>
+                            <div class="fw-semibold mb-1">Hallucinations en feitelijke zekerheid</div>
+                            <p class="small text-muted mb-0">Als een getal niet in de prompt staat, kan AI het verzinnen — plausibel klinkend, maar fout. Valideer altijd de kerncijfers in de output. Gebruik AI voor de tekst, niet als bron van feiten die jij niet zelf hebt aangeleverd.</p>
+                        </div>
+                    </div>
+
+                    <div class="limitation-item">
+                        <div class="limitation-marker text-danger"><i class="bi bi-x-circle-fill"></i></div>
+                        <div>
+                            <div class="fw-semibold mb-1">Ethische weging</div>
+                            <p class="small text-muted mb-0">Welke interventie past bij de cultuur van jullie organisatie? Hoe weeg je privacy af tegen inzicht? Wat vind je acceptabel om te meten? Dit zijn mensvragen. AI geeft een antwoord — maar dat antwoord heeft geen waarden.</p>
+                        </div>
+                    </div>
+
+                    <div class="limitation-item">
+                        <div class="limitation-marker text-danger"><i class="bi bi-x-circle-fill"></i></div>
+                        <div>
+                            <div class="fw-semibold mb-1">Jouw organisatie kennen</div>
+                            <p class="small text-muted mb-0">AI heeft geen geheugen van vorige gesprekken, geen kennis van jullie sector, cultuur of geschiedenis. Alles wat relevant is, moet je aanleveren. Een AI die jouw organisatie "kent" is een AI die jij voorziet van de juiste context — niet andersom.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <hr class="my-5">
+
+            <!-- Data Science nuance -->
+            <section class="article-section">
+                <h2 class="h3 fw-bold mb-1" style="color:#212529;">AI vervangt Data Science niet</h2>
+                <p class="text-muted mb-4">Een misverstand dat regelmatig opduikt: als AI zulke goede analyses geeft, heb je geen data scientist meer nodig. Dat klopt niet — en het is belangrijk te begrijpen waarom.</p>
+
+                <p>AI-taalmodellen zijn tekstgeneratoren. Ze produceren geen modellen, berekenen geen regressies en detecteren geen patronen in ruwe data. Wat ze wél kunnen: de <em>output</em> van een statistisch of machine learning model omzetten in begrijpelijke taal — voor een manager, een HR-businesspartner, of een ondernemingsraad.</p>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100" style="border-left: 3px solid #6f42c1 !important;">
+                            <div class="card-body p-3">
+                                <div class="fw-semibold mb-2 small" style="color:#6f42c1;"><i class="bi bi-bar-chart-line me-1"></i>Wat Data Science doet</div>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li class="mb-1">Voorspellingsmodellen bouwen (verloop, verzuimrisico)</li>
+                                    <li class="mb-1">Patronen detecteren in grote, ongestructureerde datasets</li>
+                                    <li class="mb-1">Statistische significantie bepalen</li>
+                                    <li class="mb-1">Causaliteit onderzoeken (wat veroorzaakt het probleem?)</li>
+                                    <li>Feature engineering: welke variabelen voorspellen iets?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100" style="border-left: 3px solid #0d6efd !important;">
+                            <div class="card-body p-3">
+                                <div class="fw-semibold mb-2 small text-primary"><i class="bi bi-cpu me-1"></i>Wat AI daarna doet</div>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li class="mb-1">De modeloutput vertalen naar leesbare tekst</li>
+                                    <li class="mb-1">Inzichten toegankelijk maken voor niet-analisten</li>
+                                    <li class="mb-1">Contextualiseren met externe benchmarks</li>
+                                    <li class="mb-1">Aanbevelingen formuleren op basis van aangeleverde data</li>
+                                    <li>Rapportages schrijven die direct bruikbaar zijn</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-secondary border-0 small mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Concreet voorbeeld:</strong> een verloopmodel (Data Science) berekent dat medewerkers in een bepaalde functiegroep 3× meer kans hebben om binnen 12 maanden te vertrekken. AI neemt die uitkomst en schrijft een managementsamenvatting met de relevante context, een geformuleerde aanbeveling en een toelichting die een HR-directeur direct kan gebruiken in een MT-vergadering. Zonder het model heeft de AI niets om op te baseren. Zonder de AI kost het communiceren van de modeluitkomst veel extra tijd.
+                </div>
+            </section>
+
+            <hr class="my-5">
+
+            <!-- Rol PA professional -->
+            <section class="article-section">
+                <h2 class="h3 fw-bold mb-1" style="color:#212529;">De rol van de PA professional blijft centraal</h2>
+                <p class="text-muted mb-4">AI maakt de PA professional niet overbodig — het verschuift wat jij doet.</p>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="role-shift-card">
+                            <div class="small text-muted fw-semibold mb-2 text-uppercase" style="font-size:.7rem; letter-spacing:.04em;">Vroeger primair</div>
+                            <ul class="small text-muted mb-0 ps-3">
+                                <li>Rapporten handmatig schrijven</li>
+                                <li>Cijfers ophalen en formatteren</li>
+                                <li>Standaard benchmarks opzoeken</li>
+                                <li>Dezelfde grafieken steeds opnieuw</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="role-shift-card role-shift-card--primary">
+                            <div class="small fw-semibold mb-2 text-uppercase" style="font-size:.7rem; letter-spacing:.04em; color: #0d6efd;">Nu waardevoller</div>
+                            <ul class="small mb-0 ps-3">
+                                <li>Datapipeline ontwerpen (wat gaat in de prompt?)</li>
+                                <li>Output valideren en contextualiseren</li>
+                                <li>Beslissingen nemen op basis van inzicht</li>
+                                <li>Privacy en toegangscontrole bewaken</li>
+                                <li>Organisatiekennis toevoegen die AI niet heeft</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="small text-muted">De PA professional die AI inzet is productiever, maar ook meer verantwoordelijk: je moet begrijpen <em>wat</em> er in de prompt gaat, <em>waarom</em> dat veilig is, en <em>hoe</em> je de output op waarde schat. Dat is een hoger niveau van werk, niet minder werk.</p>
+            </section>
+
+            <!-- Artikel navigatie -->
+            <div class="article-nav mt-5 pt-4 border-top d-flex justify-content-between align-items-center">
+                <div></div>
+                <a href="/kennisbank/ai-hoe-werkt-het" class="btn btn-primary">
+                    Artikel 2: Hoe werkt het technisch? <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4 d-none d-lg-block">
+            <div class="sticky-top" style="top:2rem;">
+                <div class="card border-0 bg-light rounded-3 p-4 mb-4">
+                    <div class="small fw-semibold mb-3 text-uppercase" style="font-size:.7rem; letter-spacing:.04em; color:#6c757d;">In deze serie</div>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="kb-sidebar-item kb-sidebar-item--active">
+                            <span class="kb-sidebar-num">1</span>
+                            <span>Wat kan AI wel en niet?</span>
+                        </div>
+                        <a href="/kennisbank/ai-hoe-werkt-het" class="kb-sidebar-item text-decoration-none">
+                            <span class="kb-sidebar-num">2</span>
+                            <span>Hoe werkt het technisch?</span>
+                        </a>
+                        <a href="/kennisbank/ai-data-security" class="kb-sidebar-item text-decoration-none">
+                            <span class="kb-sidebar-num">3</span>
+                            <span>Data security</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="card border-0 bg-light rounded-3 p-4">
+                    <div class="small fw-semibold mb-2">Live voorbeeld</div>
+                    <p class="small text-muted mb-3">Bekijk hoe AI verzuimanalyse in de praktijk werkt op basis van echte CBS-data.</p>
+                    <a href="/tools/ziekteverzuim" class="btn btn-outline-primary btn-sm w-100">
+                        <i class="bi bi-clipboard2-pulse me-1"></i>Open ziekteverzuim tool
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.article-section { margin-bottom: 0; }
+
+.usecase-card {
+    display: flex;
+    gap: .85rem;
+    align-items: flex-start;
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 1rem;
+    height: 100%;
+    box-shadow: 0 1px 3px rgba(0,0,0,.05);
+}
+.usecase-icon {
+    font-size: 1.2rem;
+    border-radius: 8px;
+    padding: .4rem .5rem;
+    flex-shrink: 0;
+}
+
+.limitation-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.limitation-item {
+    display: flex;
+    gap: .85rem;
+    align-items: flex-start;
+}
+.limitation-marker {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: .1rem;
+}
+
+.role-shift-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    height: 100%;
+}
+.role-shift-card--primary {
+    background: #f0f5ff;
+    border-color: #c7d9ff;
+}
+
+/* Sidebar */
+.kb-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .5rem .6rem;
+    border-radius: 8px;
+    font-size: .875rem;
+    color: #6c757d;
+    transition: background .1s;
+}
+.kb-sidebar-item:hover { background: #e9ecef; }
+.kb-sidebar-item--active {
+    background: #e8f0fe;
+    color: #0d6efd;
+    font-weight: 600;
+}
+.kb-sidebar-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #495057;
+}
+.kb-sidebar-item--active .kb-sidebar-num {
+    background: #0d6efd;
+    color: white;
+}
+</style>
+{% endblock %}

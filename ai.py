@@ -108,8 +108,9 @@ Begin elke sectie direct met de inhoud, zonder labels, koppen, HTML of Markdown.
         response = _get_client().chat.completions.create(
             model=_DEEPSEEK_MODEL,
             messages=[{'role': 'user', 'content': prompt}],
-            max_tokens=500,
+            max_tokens=2000,
             temperature=0.7,
+            extra_body={'reasoning_effort': 'low'},
         )
         _log('analyze', response, int((time.monotonic() - t0) * 1000))
         import re as _re
@@ -172,8 +173,9 @@ Begin elke sectie direct met de inhoud, zonder labels, koppen, HTML of Markdown.
         response = _get_client().chat.completions.create(
             model=_DEEPSEEK_MODEL,
             messages=[{'role': 'user', 'content': prompt}],
-            max_tokens=500,
+            max_tokens=2000,
             temperature=0.7,
+            extra_body={'reasoning_effort': 'low'},
         )
         _log('compare', response, int((time.monotonic() - t0) * 1000))
         def _strip(text):
@@ -255,6 +257,7 @@ def lookup_company_info(company_name):
         messages=[{'role': 'user', 'content': prompt}],
         max_tokens=200,
         temperature=0.0,
+        extra_body={'reasoning_effort': 'low'},
     )
     _log('lookup', response, int((time.monotonic() - t0) * 1000))
     content = response.choices[0].message.content.strip()
@@ -499,6 +502,7 @@ def chat_with_agent(message, history, df, pred_df, active_sector=None):
             tool_choice='auto',
             max_tokens=600,
             temperature=0.5,
+            extra_body={'reasoning_effort': 'low'},
         )
         _log('chat', response, int((time.monotonic() - t0) * 1000))
         msg = response.choices[0].message
@@ -522,3 +526,165 @@ def chat_with_agent(message, history, df, pred_df, active_sector=None):
             })
 
     return 'Sorry, ik kon deze vraag niet volledig beantwoorden. Probeer het opnieuw.'
+
+
+# ── Role-based access control demo ───────────────────────────────────────────
+
+# Synthetic HR dataset for the demo — no real personal data
+_DEMO_ORG = {
+    'name': 'DemoOrg B.V.',
+    'sector': 'G Handel',
+    'departments': {
+        'Finance':    {'n': 12, 'verzuim_pct': 3.2, 'trend': 'stabiel'},
+        'IT':         {'n': 28, 'verzuim_pct': 2.1, 'trend': 'dalend'},
+        'Operations': {'n': 45, 'verzuim_pct': 6.8, 'trend': 'stijgend'},
+        'Sales':      {'n': 19, 'verzuim_pct': 4.5, 'trend': 'stabiel'},
+        'HR':         {'n':  4, 'verzuim_pct': 5.0, 'trend': 'stabiel'},  # n<5: anonimiseren
+    },
+    'sector_avg': 4.1,
+    'national_avg': 4.4,
+}
+
+_ROLE_PERMISSIONS = {
+    'medewerker': {
+        'label': 'Medewerker',
+        'icon': 'bi-person',
+        'can_see_own': True,
+        'can_see_team': False,
+        'can_see_other_depts': False,
+        'min_group_size': None,
+        'description': 'Ziet alleen eigen verzuimgeschiedenis.',
+    },
+    'manager': {
+        'label': 'Manager',
+        'icon': 'bi-person-badge',
+        'can_see_own': True,
+        'can_see_team': True,
+        'can_see_other_depts': False,
+        'min_group_size': 5,
+        'description': 'Ziet eigen team (mits n≥5), geen andere afdelingen.',
+    },
+    'hrbp': {
+        'label': 'HR Business Partner',
+        'icon': 'bi-people',
+        'can_see_own': True,
+        'can_see_team': True,
+        'can_see_other_depts': True,
+        'min_group_size': 5,
+        'description': 'Ziet alle afdelingen geaggregeerd (mits n≥5), geen individuen.',
+    },
+    'hrdirecteur': {
+        'label': 'HR Directeur',
+        'icon': 'bi-person-gear',
+        'can_see_own': True,
+        'can_see_team': True,
+        'can_see_other_depts': True,
+        'min_group_size': 5,
+        'description': 'Ziet alle data inclusief trends en benchmarks, geen individuen.',
+    },
+}
+
+
+def _build_role_context(role: str) -> tuple[str, str]:
+    """Build the data context and access rules for a given role.
+
+    Returns:
+        tuple[str, str]: (context_for_prompt, access_explanation)
+    """
+    perms = _ROLE_PERMISSIONS.get(role, _ROLE_PERMISSIONS['medewerker'])
+    org = _DEMO_ORG
+    min_n = perms['min_group_size'] or 0
+    lines = []
+    blocked_depts = []
+
+    if perms['can_see_other_depts'] or perms['can_see_team']:
+        for dept, data in org['departments'].items():
+            if data['n'] < min_n:
+                blocked_depts.append(dept)
+                lines.append(f"- {dept}: gegevens niet toonbaar (groep te klein, n={data['n']} < {min_n})")
+            else:
+                lines.append(
+                    f"- {dept}: verzuim {data['verzuim_pct']}%, trend {data['trend']}, n={data['n']}"
+                )
+        dept_block = '\n'.join(lines)
+    else:
+        dept_block = 'Afdelingsdata: niet beschikbaar voor deze rol.'
+
+    if perms['can_see_other_depts']:
+        benchmark = (
+            f"Sectorgemiddelde ({org['sector']}): {org['sector_avg']}%\n"
+            f"Nationaal gemiddelde: {org['national_avg']}%"
+        )
+    else:
+        benchmark = 'Benchmarkdata: niet beschikbaar voor deze rol.'
+
+    context = f"""Organisatie: {org['name']}
+Rol van de gebruiker: {perms['label']}
+
+BESCHIKBARE DATA VOOR DEZE ROL:
+{dept_block}
+
+{benchmark}
+
+TOEGANGSREGELS:
+- Individuele medewerkerdata: NOOIT tonen, ongeacht de vraag
+- Groepen kleiner dan {min_n if min_n else 'n.v.t.'}: niet tonen
+- Data buiten bovenstaand overzicht: niet tonen of speculeren
+- Geef een duidelijke maar vriendelijke melding als een vraag buiten de toegang valt"""
+
+    access_explanation = (
+        f"Rol: **{perms['label']}** — {perms['description']}"
+        + (f" Afdelingen met n<{min_n} worden geanonimiseerd: {', '.join(blocked_depts)}." if blocked_depts else "")
+    )
+    return context, access_explanation
+
+
+def role_demo_query(role: str, question: str) -> dict:
+    """Answer an HR question as seen through a specific role's data access.
+
+    Returns:
+        dict with keys: answer (str), access_explanation (str), prompt_preview (str)
+    """
+    perms = _ROLE_PERMISSIONS.get(role)
+    if not perms:
+        return {'answer': 'Onbekende rol.', 'access_explanation': '', 'prompt_preview': ''}
+
+    context, access_explanation = _build_role_context(role)
+
+    system = (
+        'Je bent een HR-data assistent. Je beantwoordt vragen op basis van uitsluitend de data '
+        'die beschikbaar is voor de rol van de gebruiker. Je past de privacyregels strikt toe: '
+        'noem nooit individuele medewerkers, toon nooit data van groepen die als "niet toonbaar" '
+        'zijn gemarkeerd, en speculeer niet over data die je niet hebt. '
+        'Als een vraag buiten de toegang van de gebruiker valt, leg je vriendelijk uit waarom '
+        'je die informatie niet kunt geven en wat de gebruiker wél kan doen. '
+        'Antwoord in professioneel Nederlands. Maximaal 3 zinnen.'
+    )
+
+    prompt = f"{context}\n\nVraag van de gebruiker: {question}"
+
+    # Build a readable prompt preview (stripped of excess whitespace)
+    prompt_preview = f"[Systeeminstructie]\n{system}\n\n[Datakader voor deze rol]\n{context}\n\n[Vraag]\n{question}"
+
+    try:
+        t0 = time.monotonic()
+        response = _get_client().chat.completions.create(
+            model=_DEEPSEEK_MODEL,
+            messages=[
+                {'role': 'system', 'content': system},
+                {'role': 'user', 'content': prompt},
+            ],
+            max_tokens=300,
+            temperature=0.3,
+            extra_body={'reasoning_effort': 'low'},
+        )
+        _log('role_demo', response, int((time.monotonic() - t0) * 1000))
+        answer = re.sub(r'<[^>]+>', '', response.choices[0].message.content).strip()
+    except Exception as e:
+        answer = f'Fout bij ophalen antwoord: {e}'
+
+    return {
+        'answer': answer,
+        'access_explanation': access_explanation,
+        'prompt_preview': prompt_preview,
+    }
