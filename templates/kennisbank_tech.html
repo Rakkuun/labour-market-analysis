@@ -50,7 +50,7 @@
                             <div class="text-muted small">HR-systemen, registratietools, externe bronnen (CBS, UWV). Inconsistent, onvolledig, herleidbaar tot individuen.</div>
                         </div>
                     </div>
-                    <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+                    <div class="pipeline-arrow"><i class="bi bi-arrow-down text-muted"></i></div>
                     <div class="pipeline-step">
                         <div class="pipeline-step-icon bg-warning-subtle text-warning"><i class="bi bi-funnel"></i></div>
                         <div class="pipeline-step-body">
@@ -58,15 +58,15 @@
                             <div class="text-muted small">Verwijder nulls, normaliseer kolommen, aggregeer naar groepsniveau. Individuen worden onzichtbaar.</div>
                         </div>
                     </div>
-                    <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+                    <div class="pipeline-arrow"><i class="bi bi-arrow-down text-muted"></i></div>
                     <div class="pipeline-step">
                         <div class="pipeline-step-icon bg-success-subtle text-success"><i class="bi bi-bookmarks"></i></div>
                         <div class="pipeline-step-body">
-                            <div class="fw-semibold">3. Context toevoegen</div>
-                            <div class="text-muted small">Koppel externe benchmarks (sectorgemiddelden, griepdata). Geef de AI het kader om betekenis te geven aan getallen.</div>
+                            <div class="fw-semibold">3. Semantische laag & context <span class="badge bg-success-subtle text-success-emphasis ms-1" style="font-size:.65rem;font-weight:600;vertical-align:middle;">Cruciaal</span></div>
+                            <div class="text-muted small">Leg bedrijfslogica expliciet vast: wat telt als verloop? Hoe bereken je verzuim? Koppel externe benchmarks. Dit is de laag die AI van gokken naar weten brengt — <a href="#semantische-laag" class="text-muted">zie verderop</a>.</div>
                         </div>
                     </div>
-                    <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+                    <div class="pipeline-arrow"><i class="bi bi-arrow-down text-muted"></i></div>
                     <div class="pipeline-step">
                         <div class="pipeline-step-icon bg-info-subtle text-info"><i class="bi bi-cpu"></i></div>
                         <div class="pipeline-step-body">
@@ -74,7 +74,7 @@
                             <div class="text-muted small">Gestructureerde tekst met rol-instructie, de data-context en de specifieke vraag. De AI ziet nooit ruwe of persoonsgebonden data.</div>
                         </div>
                     </div>
-                    <div class="pipeline-arrow"><i class="bi bi-arrow-right text-muted"></i></div>
+                    <div class="pipeline-arrow"><i class="bi bi-arrow-down text-muted"></i></div>
                     <div class="pipeline-step">
                         <div class="pipeline-step-icon bg-primary-subtle text-primary"><i class="bi bi-chat-text"></i></div>
                         <div class="pipeline-step-body">
@@ -202,6 +202,115 @@ Eindig met een concrete aanbeveling.</pre>
 
             <hr class="my-5">
 
+            <!-- Semantische laag -->
+            <section class="mb-5" id="semantische-laag" style="scroll-margin-top:5rem;">
+                <h2 class="h3 fw-bold mb-1" style="color:#212529;">De semantische laag: waarom ruwe data niet genoeg is</h2>
+                <p class="text-muted mb-4">Power BI, Tableau, Looker — al deze tools zijn gebouwd voor mensen die dashboards lezen. Niet voor AI-agents die vragen stellen. Dat is geen kritiek — het is gewoon een ander gereedschap voor een andere wereld.</p>
+
+                <p>Steeds meer organisaties annuleren hun BI-licenties. Te duur, te traag om aan te passen, de helft van de licenties ongebruikt. De logische stap daarna: AI direct op de ruwe data zetten en vragen gaan stellen.</p>
+                <p>Dat werkt. Tot het niet meer werkt.</p>
+
+                <div class="alert alert-warning border-0 mb-4">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>AI geeft zelfverzekerde antwoorden — ook als de data geen regels heeft.</strong><br>
+                    <span class="small">Verloop berekend op één manier vandaag, op een andere manier morgen. Medewerkers die als uitgestroomd worden geteld terwijl ze op verlof zijn. AI is niet stuk — de data heeft gewoon geen definitie.</span>
+                </div>
+
+                <p>Dit is de laag die weinig mensen benoemen: de <strong>semantische laag</strong>. De plek tussen je ruwe HR-data en je AI-agent waar de bedrijfslogica expliciet wordt vastgelegd.</p>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 h-100" style="background:#fdf6ec; border-left:4px solid #f59e0b !important; border-left-width:4px;">
+                            <div class="card-body p-3">
+                                <div class="fw-semibold small mb-2 text-warning-emphasis"><i class="bi bi-question-circle me-2"></i>Zonder semantische laag</div>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li>Wat telt als "vrijwillig verloop"? Onduidelijk.</li>
+                                    <li>Wordt langdurig verzuim meegeteld in het verzuimpercentage? Soms wel, soms niet.</li>
+                                    <li>Welke contractvormen tellen mee in de headcount? Per query anders.</li>
+                                    <li>Resultaat: AI improviseert de definitie bij elke vraag.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 h-100" style="background:#f0fdf4; border-left:4px solid #10b981 !important; border-left-width:4px;">
+                            <div class="card-body p-3">
+                                <div class="fw-semibold small mb-2 text-success-emphasis"><i class="bi bi-check-circle me-2"></i>Met semantische laag</div>
+                                <ul class="small text-muted mb-0 ps-3">
+                                    <li>Verloop = medewerkers die de organisatie verlaten, exclusief uitzendkrachten, exclusief pensioen.</li>
+                                    <li>Verzuim = kort + middellang, langdurig apart gerapporteerd.</li>
+                                    <li>Headcount = FTE op peilmoment, medewerkers met vast of tijdelijk contract.</li>
+                                    <li>Resultaat: AI geeft elke keer hetzelfde antwoord op dezelfde vraag.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="mb-4">BI-tools zoals Power BI, Tableau en Looker vulden deze laag altijd al in — verstopt in workbooks en rapporten, onzichtbaar, fragiel. In een AI-wereld moet die laag <em>expliciet</em> zijn. Gedocumenteerd. Meegestuurd als context in elke prompt. Dat is precies wat de pipeline hierboven doet: niet AI op ruwe data, maar AI op een voorbereide, gedefinieerde datalaag.</p>
+
+                <h3 class="h5 fw-bold mb-3" style="color:#212529;">Hoe werkt dit technisch?</h3>
+                <p class="mb-3">De AI heeft geen geheugen van jouw datamodel. Bij elke prompt bouw je een <strong>context-pakket</strong> dat de AI vertelt hoe jouw data werkt — definities en geaggregeerde cijfers samen in één blok:</p>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-dark text-light small fw-semibold border-0">
+                        <i class="bi bi-code-square me-2"></i>Prompt met semantische laag (voorbeeld)
+                    </div>
+                    <div class="card-body p-0">
+                        <pre class="bg-dark text-light rounded-bottom p-3 mb-0" style="white-space:pre-wrap;font-size:.75rem;">DEFINITIES:
+- Verloop = medewerkers die de organisatie verlaten in periode X,
+  exclusief uitzendkrachten, exclusief pensioen, exclusief detachering
+- Verzuimpercentage = (verzuimdagen / beschikbare werkdagen) × 100,
+  alleen medewerkers met vast of tijdelijk contract
+- Headcount = FTE op eerste dag van de maand
+
+DATA Q1 2026:
+- Verloop: 4.2% (sector Handel gemiddelde: 5.1%)
+- Verzuim: 5.8%
+
+Geef een analyse van het verzuim en verloop ten opzichte van de sector.</pre>
+                    </div>
+                </div>
+
+                <p class="mb-4">Zonder de definitieblok improviseert de AI. Met die blok geeft hij elke keer hetzelfde antwoord op dezelfde vraag — verifieerbaar en consistent.</p>
+
+                <h3 class="h5 fw-bold mb-3" style="color:#212529;">Wat moet een data analist concreet doen?</h3>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light h-100 p-3">
+                            <div class="fw-semibold small mb-2"><span class="badge bg-primary me-2">1</span>Definities vastleggen</div>
+                            <p class="small text-muted mb-0">Schrijf in platte taal op wat elke metric betekent — inclusief wat er <em>niet</em> in zit. Behandel het als een woordenboek. Eén definitie per metric, centraal beheerd.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light h-100 p-3">
+                            <div class="fw-semibold small mb-2"><span class="badge bg-primary me-2">2</span>Berekeningen centraliseren</div>
+                            <p class="small text-muted mb-0">Één Python- of SQL-functie per metric. Niet dezelfde berekening op drie plekken. Als de definitie wijzigt, pas je hem maar één keer aan.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light h-100 p-3">
+                            <div class="fw-semibold small mb-2"><span class="badge bg-primary me-2">3</span>Aggregeren vóór de prompt</div>
+                            <p class="small text-muted mb-0">Ruwe rijen gaan nooit naar de AI. Bereken gemiddelden, percentages en trends in code — en geef alleen die uitkomsten mee als input.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 bg-light h-100 p-3">
+                            <div class="fw-semibold small mb-2"><span class="badge bg-primary me-2">4</span>Prompt-template bouwen</div>
+                            <p class="small text-muted mb-0">Eén herbruikbare promptstructuur met placeholders die vanuit code worden ingevuld. De AI-instructie blijft stabiel; alleen de data wisselt.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-light border small mb-0">
+                    <i class="bi bi-tools me-2 text-muted"></i>
+                    <strong>Tools die dit ondersteunen:</strong> <strong>dbt</strong> (definities in YAML bovenop een warehouse), <strong>Cube.dev / LookML</strong> (dedicated semantische laag, querybaar door AI), of simpelweg een <strong>Python dict of YAML-bestand</strong> met definities dat je bij elke prompt inlaadt. Voor de meeste PA-teams is dat laatste al meer dan genoeg.
+                </div>
+            </section>
+
+            <hr class="my-5">
+
             <!-- Live demo -->
             <section class="mb-5">
                 <h2 class="h3 fw-bold mb-1" style="color:#212529;">Probeer het zelf</h2>
@@ -241,7 +350,7 @@ Eindig met een concrete aanbeveling.</pre>
 
         <!-- Sidebar -->
         <div class="col-lg-4 d-none d-lg-block">
-            <div class="sticky-top" style="top:2rem;">
+            <div class="sticky-top" style="top:5rem;">
                 <div class="card border-0 bg-light rounded-3 p-4 mb-4">
                     <div class="small fw-semibold mb-3 text-uppercase" style="font-size:.7rem; letter-spacing:.04em; color:#6c757d;">In deze serie</div>
                     <div class="d-flex flex-column gap-2">
@@ -266,6 +375,21 @@ Eindig met een concrete aanbeveling.</pre>
                         <i class="bi bi-clipboard2-pulse me-1"></i>Open ziekteverzuim tool
                     </a>
                 </div>
+                <div class="card border-0 rounded-3 p-4 mt-4" style="background:#f0f7ff; border-left:3px solid #0d6efd !important;">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                             style="width:36px;height:36px;font-size:.85rem;">S</div>
+                        <div>
+                            <div class="fw-semibold small">Sander ten Kate</div>
+                            <div class="text-muted" style="font-size:.72rem;">Head of PA, Data & AI · Lidl</div>
+                        </div>
+                    </div>
+                    <p class="small text-muted mb-3">Sparren over deze inhoud? Kan altijd — ik denk graag mee over People Analytics vraagstukken.</p>
+                    <a href="https://www.linkedin.com/in/sander-ten-kate-b220215a/" target="_blank" rel="noopener"
+                       class="btn btn-primary btn-sm w-100">
+                        <i class="bi bi-linkedin me-1"></i>Neem contact op
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -274,9 +398,9 @@ Eindig met een concrete aanbeveling.</pre>
 <style>
 .pipeline-steps {
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: .5rem;
+    flex-direction: column;
+    gap: 0;
+    max-width: 560px;
 }
 .pipeline-step {
     display: flex;
@@ -286,8 +410,6 @@ Eindig met een concrete aanbeveling.</pre>
     border-radius: 10px;
     box-shadow: 0 1px 3px rgba(0,0,0,.08);
     padding: .9rem 1rem;
-    flex: 1 1 150px;
-    min-width: 130px;
 }
 .pipeline-step-icon {
     font-size: 1.3rem;
@@ -295,8 +417,13 @@ Eindig met een concrete aanbeveling.</pre>
     padding: .35rem .45rem;
     flex-shrink: 0;
 }
-.pipeline-arrow { align-self: center; font-size: 1.1rem; flex-shrink: 0; }
-@media (max-width: 767px) { .pipeline-arrow { display: none; } }
+.pipeline-arrow {
+    align-self: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    padding: .15rem 0 .15rem 1.1rem;
+    color: #adb5bd;
+}
 
 .kb-sidebar-item {
     display: flex; align-items: center; gap: .6rem;
