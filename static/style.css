@@ -296,6 +296,9 @@ body {
 /* ── Kennisbank article headings ─────────────────────────────────────────── */
 .kb-article-h { color: #212529; }
 
+/* Keep article sidebar below navbar dropdown (Bootstrap sticky-top = 1020, dropdown = 1000) */
+.kb-sidebar-sticky { z-index: 2; }
+
 
 .filter-panel {
     background: white;
