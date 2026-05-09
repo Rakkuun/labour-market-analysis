@@ -21,7 +21,7 @@
                     <span class="badge bg-warning-subtle text-warning fw-semibold px-3 py-2" style="font-size:.75rem; border-radius:20px; border: 1px solid #ffe08a;">Artikel 2 van 3</span>
                     <span class="text-muted small"><i class="bi bi-clock me-1"></i>6 min leestijd</span>
                 </div>
-                <h1 class="display-6 fw-bold mb-3" style="color:#212529;">Hoe werkt AI met HR-data technisch?</h1>
+                <h1 class="display-6 fw-bold mb-3 kb-article-h">Hoe werkt AI met HR-data technisch?</h1>
                 <p class="lead text-muted">Data moet klaarstaan voordat AI iets kan. Je prompt voor tekst-analyse — niet voor de analyse zelf. Zo werkt de pipeline van ruwe data naar bruikbaar inzicht.</p>
             </div>
 
@@ -39,7 +39,7 @@
 
             <!-- Pipeline -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">De datapipeline stap voor stap</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">De datapipeline stap voor stap</h2>
                 <p class="text-muted mb-4">Elke stap heeft een doel. Sla er één over, en de kwaliteit van het eindresultaat lijdt eronder.</p>
 
                 <div class="pipeline-steps mb-4">
@@ -145,7 +145,7 @@
 
             <!-- Prompt/response voorbeeld -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Wat gaat er in, wat komt er uit</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Wat gaat er in, wat komt er uit</h2>
                 <p class="text-muted mb-4">Een AI-taalmodel leest geen database. Het krijgt een tekstuele prompt met gestructureerde context. Zo ziet dat eruit.</p>
 
                 <div class="row g-4 mb-3">
@@ -204,7 +204,7 @@ Eindig met een concrete aanbeveling.</pre>
 
             <!-- Semantische laag -->
             <section class="mb-5" id="semantische-laag" style="scroll-margin-top:5rem;">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">De semantische laag: waarom ruwe data niet genoeg is</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">De semantische laag: waarom ruwe data niet genoeg is</h2>
                 <p class="text-muted mb-4">Power BI, Tableau, Looker — al deze tools zijn gebouwd voor mensen die dashboards lezen. Niet voor AI-agents die vragen stellen. Dat is geen kritiek — het is gewoon een ander gereedschap voor een andere wereld.</p>
 
                 <p>Steeds meer organisaties annuleren hun BI-licenties. Te duur, te traag om aan te passen, de helft van de licenties ongebruikt. De logische stap daarna: AI direct op de ruwe data zetten en vragen gaan stellen.</p>
@@ -249,7 +249,7 @@ Eindig met een concrete aanbeveling.</pre>
 
                 <p class="mb-4">BI-tools zoals Power BI, Tableau en Looker vulden deze laag altijd al in — verstopt in workbooks en rapporten, onzichtbaar, fragiel. In een AI-wereld moet die laag <em>expliciet</em> zijn. Gedocumenteerd. Meegestuurd als context in elke prompt. Dat is precies wat de pipeline hierboven doet: niet AI op ruwe data, maar AI op een voorbereide, gedefinieerde datalaag.</p>
 
-                <h3 class="h5 fw-bold mb-3" style="color:#212529;">Hoe werkt dit technisch?</h3>
+                <h3 class="h5 fw-bold mb-3 kb-article-h">Hoe werkt dit technisch?</h3>
                 <p class="mb-3">De AI heeft geen geheugen van jouw datamodel. Bij elke prompt bouw je een <strong>context-pakket</strong> dat de AI vertelt hoe jouw data werkt — definities en geaggregeerde cijfers samen in één blok:</p>
 
                 <div class="card border-0 shadow-sm mb-4">
@@ -274,7 +274,7 @@ Geef een analyse van het verzuim en verloop ten opzichte van de sector.</pre>
 
                 <p class="mb-4">Zonder de definitieblok improviseert de AI. Met die blok geeft hij elke keer hetzelfde antwoord op dezelfde vraag — verifieerbaar en consistent.</p>
 
-                <h3 class="h5 fw-bold mb-3" style="color:#212529;">Wat moet een data analist concreet doen?</h3>
+                <h3 class="h5 fw-bold mb-3 kb-article-h">Wat moet een data analist concreet doen?</h3>
 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
@@ -313,7 +313,7 @@ Geef een analyse van het verzuim en verloop ten opzichte van de sector.</pre>
 
             <!-- Live demo -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Probeer het zelf</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Probeer het zelf</h2>
                 <p class="text-muted mb-4">Stel een vraag over Nederlands ziekteverzuim. De AI antwoordt op basis van echte CBS-data (1996–2025, 39 sectoren).</p>
 
                 <div class="card border-0 shadow-sm" style="max-width:680px;">
@@ -425,20 +425,8 @@ Geef een analyse van het verzuim en verloop ten opzichte van de sector.</pre>
     color: #adb5bd;
 }
 
-.kb-sidebar-item {
-    display: flex; align-items: center; gap: .6rem;
-    padding: .5rem .6rem; border-radius: 8px;
-    font-size: .875rem; color: #6c757d;
-    transition: background .1s;
-}
-.kb-sidebar-item:hover { background: #e9ecef; }
+/* Sidebar active state (article 2 — amber) */
 .kb-sidebar-item--active { background: #fff8e1; color: #856404; font-weight: 600; }
-.kb-sidebar-num {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: #dee2e6; display: flex; align-items: center;
-    justify-content: center; font-size: .7rem; font-weight: 700;
-    flex-shrink: 0; color: #495057;
-}
 .kb-sidebar-item--active .kb-sidebar-num { background: #ffc107; color: #212529; }
 </style>
 

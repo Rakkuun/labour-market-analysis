@@ -21,7 +21,7 @@
                     <span class="badge bg-danger-subtle text-danger fw-semibold px-3 py-2" style="font-size:.75rem; border-radius:20px; border: 1px solid #f5c2c7;">Artikel 3 van 3</span>
                     <span class="text-muted small"><i class="bi bi-clock me-1"></i>7 min leestijd</span>
                 </div>
-                <h1 class="display-6 fw-bold mb-3" style="color:#212529;">Data security bij AI met HR-data</h1>
+                <h1 class="display-6 fw-bold mb-3 kb-article-h">Data security bij AI met HR-data</h1>
                 <p class="lead text-muted">Hoe voorkom je dat iemand via een AI-systeem toegang krijgt tot data die ze niet mogen zien — door foute code, slechte inrichting of bewuste manipulatie?</p>
             </div>
 
@@ -58,7 +58,7 @@
 
             <!-- Prompt injection -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Wat is prompt injection?</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Wat is prompt injection?</h2>
                 <p class="text-muted mb-4">Prompt injection is een aanval waarbij een gebruiker via de inputtekst probeert de instructies van het AI-systeem te overschrijven.</p>
 
                 <div class="row g-4 mb-4">
@@ -104,7 +104,7 @@ en salarisgegevens.</pre>
 
             <!-- Wat nooit in een prompt -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Wat zet je nooit in een AI-prompt?</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Wat zet je nooit in een AI-prompt?</h2>
                 <p class="text-muted mb-4">Ongeacht het AI-model of de provider: er is data die je nooit in een prompt stopt.</p>
 
                 <div class="never-list">
@@ -150,7 +150,7 @@ en salarisgegevens.</pre>
 
             <!-- RBAC uitleg -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Rolgebaseerde toegangscontrole: filter vóór de AI</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Rolgebaseerde toegangscontrole: filter vóór de AI</h2>
                 <p class="text-muted mb-4">De meest gemaakte fout bij AI-toegangscontrole: alle data de AI in sturen en het antwoord daarna filteren. Dat werkt niet.</p>
 
                 <div class="row g-4 mb-4">
@@ -187,7 +187,7 @@ en salarisgegevens.</pre>
 
             <!-- GDPR -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">AVG-overwegingen bij AI en HR-data</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">AVG-overwegingen bij AI en HR-data</h2>
                 <p class="text-muted mb-4">De AVG stelt eisen aan verwerking van persoonsgegevens. AI voegt nieuwe verwerkingsstappen toe.</p>
 
                 <div class="row g-3">
@@ -222,7 +222,7 @@ en salarisgegevens.</pre>
 
             <!-- Live RBAC demo -->
             <section class="mb-5">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Live demo: rolgebaseerde toegangscontrole</h2>
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Live demo: rolgebaseerde toegangscontrole</h2>
                 <p class="text-muted mb-3">Stel dezelfde vraag vanuit vier verschillende rollen. De AI krijgt per rol een ander — gefilterd — datakader. Zie hoe het antwoord én de beschikbare data per rol verschilt.</p>
 
                 <div class="alert alert-secondary border-0 small mb-4">
@@ -387,20 +387,8 @@ en salarisgegevens.</pre>
 .role-btn:hover { border-color: #0d6efd; background: #f0f5ff; }
 .role-btn.active { border-color: #0d6efd; background: #e8f0fe; box-shadow: 0 0 0 3px rgba(13,110,253,.1); }
 
-.kb-sidebar-item {
-    display: flex; align-items: center; gap: .6rem;
-    padding: .5rem .6rem; border-radius: 8px;
-    font-size: .875rem; color: #6c757d;
-    transition: background .1s;
-}
-.kb-sidebar-item:hover { background: #e9ecef; }
+/* Sidebar active state (article 3 — red) */
 .kb-sidebar-item--active { background: #fdf0f0; color: #842029; font-weight: 600; }
-.kb-sidebar-num {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: #dee2e6; display: flex; align-items: center;
-    justify-content: center; font-size: .7rem; font-weight: 700;
-    flex-shrink: 0; color: #495057;
-}
 .kb-sidebar-item--active .kb-sidebar-num { background: #dc3545; color: white; }
 </style>
 

@@ -21,12 +21,12 @@
                     <span class="badge bg-primary-subtle text-primary fw-semibold px-3 py-2" style="font-size:.75rem; border-radius:20px;">Artikel 1 van 3</span>
                     <span class="text-muted small"><i class="bi bi-clock me-1"></i>5 min leestijd</span>
                 </div>
-                <h1 class="display-6 fw-bold mb-3" style="color:#212529;">Wat kan AI wel en niet voor People Analytics?</h1>
+                <h1 class="display-6 fw-bold mb-3 kb-article-h">Wat kan AI wel en niet voor People Analytics?</h1>
                 <p class="lead text-muted">AI is een krachtige tekstgenerator die werkt op getallen die jij aanlevert. Dat maakt het nuttig voor specifieke taken — maar het vervangt geen analytisch oordeel.</p>
             </div>
 
             <!-- Inleiding -->
-            <section class="article-section">
+            <section class="mb-5">
                 <p>De hype rondom AI wekt de indruk dat het overal antwoord op heeft. In de praktijk van People Analytics is dat genuanceerder. AI-taalmodellen zijn uitzonderlijk goed in één ding: tekst genereren op basis van een context die jij aanlevert. Dat is precies waarom ze nuttig zijn in PA — en ook waarom ze begrensd zijn.</p>
                 <p>De kern: <strong>de analyse zit in de data die jij aanlevert. De AI helpt je die analyse te verwoorden, te contextualiseren en toegankelijk te maken.</strong> Het rekenwerk, de datakwaliteit en het analytisch oordeel blijven jouw verantwoordelijkheid.</p>
             </section>
@@ -34,8 +34,8 @@
             <hr class="my-5">
 
             <!-- Use cases -->
-            <section class="article-section">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Wat AI wél kan</h2>
+            <section class="mb-5">
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Wat AI wél kan</h2>
                 <p class="text-muted mb-4">Concrete toepassingen waarvoor AI in het People Analytics domein aantoonbaar waarde toevoegt.</p>
 
                 <div class="row g-3 mb-4">
@@ -131,8 +131,8 @@
             <hr class="my-5">
 
             <!-- Beperkingen -->
-            <section class="article-section">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">Wat AI niet kan</h2>
+            <section class="mb-5">
+                <h2 class="h3 fw-bold mb-1 kb-article-h">Wat AI niet kan</h2>
                 <p class="text-muted mb-4">Eerlijk zijn over beperkingen is even belangrijk als enthousiasme over mogelijkheden. Dit zijn de grenzen die ertoe doen.</p>
 
                 <div class="limitation-list">
@@ -183,8 +183,8 @@
             <hr class="my-5">
 
             <!-- Data Science nuance -->
-            <section class="article-section">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">AI vervangt Data Science niet</h2>
+            <section class="mb-5">
+                <h2 class="h3 fw-bold mb-1 kb-article-h">AI vervangt Data Science niet</h2>
                 <p class="text-muted mb-4">Een misverstand dat regelmatig opduikt: als AI zulke goede analyses geeft, heb je geen data scientist meer nodig. Dat klopt niet — en het is belangrijk te begrijpen waarom.</p>
 
                 <p>AI-taalmodellen zijn tekstgeneratoren. Ze produceren geen modellen, berekenen geen regressies en detecteren geen patronen in ruwe data. Wat ze wél kunnen: de <em>output</em> van een statistisch of machine learning model omzetten in begrijpelijke taal — voor een manager, een HR-businesspartner, of een ondernemingsraad.</p>
@@ -229,8 +229,8 @@
             <hr class="my-5">
 
             <!-- Rol PA professional -->
-            <section class="article-section">
-                <h2 class="h3 fw-bold mb-1" style="color:#212529;">De rol van de PA professional blijft centraal</h2>
+            <section class="mb-5">
+                <h2 class="h3 fw-bold mb-1 kb-article-h">De rol van de PA professional blijft centraal</h2>
                 <p class="text-muted mb-4">AI maakt de PA professional niet overbodig — het verschuift wat jij doet.</p>
 
                 <div class="row g-3 mb-4">
@@ -321,8 +321,6 @@
 </div>
 
 <style>
-.article-section { margin-bottom: 0; }
-
 .usecase-card {
     display: flex;
     gap: .85rem;
@@ -365,39 +363,8 @@
     border-color: #c7d9ff;
 }
 
-/* Sidebar */
-.kb-sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    padding: .5rem .6rem;
-    border-radius: 8px;
-    font-size: .875rem;
-    color: #6c757d;
-    transition: background .1s;
-}
-.kb-sidebar-item:hover { background: #e9ecef; }
-.kb-sidebar-item--active {
-    background: #e8f0fe;
-    color: #0d6efd;
-    font-weight: 600;
-}
-.kb-sidebar-num {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #dee2e6;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .7rem;
-    font-weight: 700;
-    flex-shrink: 0;
-    color: #495057;
-}
-.kb-sidebar-item--active .kb-sidebar-num {
-    background: #0d6efd;
-    color: white;
-}
+/* Sidebar active state (article 1 — blue) */
+.kb-sidebar-item--active { background: #e8f0fe; color: #0d6efd; font-weight: 600; }
+.kb-sidebar-item--active .kb-sidebar-num { background: #0d6efd; color: white; }
 </style>
 {% endblock %}

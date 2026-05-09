@@ -267,6 +267,35 @@ body {
     color: #212529;
 }
 
+/* ── Kennisbank sidebar (shared across articles) ─────────────────────────── */
+.kb-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .5rem .6rem;
+    border-radius: 8px;
+    font-size: .875rem;
+    color: #6c757d;
+    transition: background .1s;
+}
+.kb-sidebar-item:hover { background: #e9ecef; }
+.kb-sidebar-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #dee2e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #495057;
+}
+
+/* ── Kennisbank article headings ─────────────────────────────────────────── */
+.kb-article-h { color: #212529; }
+
 
 .filter-panel {
     background: white;
